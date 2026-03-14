@@ -43,7 +43,9 @@
     
     <!-- AUTH SCREEN -->
     <div id="auth-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center relative max-h-[90vh] overflow-y-auto">
+        <button onclick="toggleLanguage()" class="lang-toggle-btn absolute top-4 right-4 text-xs font-bold text-blue-600 bg-white px-3 py-1 rounded-full shadow border border-blue-200 hover:bg-blue-50 z-10"></button>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center relative max-h-[90vh] overflow-y-auto mt-8">
             <div id="config-warning" class="hidden absolute -top-16 left-0 right-0 bg-red-100 text-red-700 p-2 rounded-lg text-xs shadow">
                 ⚠️ SCRIPT_URL missing in code!
             </div>
@@ -55,48 +57,48 @@
             <form id="auth-form" class="space-y-4 text-left">
                 <!-- Name (Signup Only) -->
                 <div id="wrap-name" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input type="text" id="auth-name" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="e.g. John Doe">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Full Name" data-bn="পুরো নাম">Full Name</label>
+                    <input type="text" id="auth-name" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="e.g. John Doe" data-en="e.g. John Doe" data-bn="যেমন: আব্দুর রহমান">
                 </div>
 
                 <!-- Email (Both) -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="auth-email" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="example@gmail.com">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Email" data-bn="ইমেইল">Email</label>
+                    <input type="email" id="auth-email" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="example@gmail.com" data-en="example@gmail.com" data-bn="example@gmail.com">
                 </div>
 
                 <!-- PIN (Signup Only) -->
                 <div id="wrap-pin" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Security PIN (5 Digit)</label>
-                    <input type="number" id="auth-pin" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="12345">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Security PIN (5 Digit)" data-bn="সিকিউরিটি পিন (৫ ডিজিট)">Security PIN (5 Digit)</label>
+                    <input type="number" id="auth-pin" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345">
                 </div>
 
                 <!-- Security Question (Signup Only) -->
                 <div id="wrap-sec-q" class="hidden space-y-3 border p-3 rounded-lg bg-gray-50">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Security Question</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Security Question" data-bn="নিরাপত্তা প্রশ্ন">Security Question</label>
                         <select id="auth-sec-q" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500 text-sm">
-                            <option value="What is your mother's name?">What is your mother's name?</option>
-                            <option value="What is the name of your first school?">What is the name of your first school?</option>
-                            <option value="What is your favorite color?">What is your favorite color?</option>
+                            <option value="What is your mother's name?" data-en="What is your mother's name?" data-bn="আপনার মায়ের নাম কী?">What is your mother's name?</option>
+                            <option value="What is the name of your first school?" data-en="What is the name of your first school?" data-bn="আপনার প্রথম স্কুলের নাম কী?">What is the name of your first school?</option>
+                            <option value="What is your favorite color?" data-en="What is your favorite color?" data-bn="আপনার প্রিয় রঙ কী?">What is your favorite color?</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Answer</label>
-                        <input type="text" id="auth-sec-a" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Enter your answer...">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Answer" data-bn="উত্তর">Answer</label>
+                        <input type="text" id="auth-sec-a" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Enter your answer..." data-en="Enter your answer..." data-bn="আপনার উত্তর লিখুন...">
                     </div>
                 </div>
 
                 <!-- Password (Both) -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Password" data-bn="পাসওয়ার্ড">Password</label>
+                    <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
                 </div>
 
                 <!-- Confirm Password (Signup Only) -->
                 <div id="wrap-confirm-pass" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                    <input type="password" id="auth-confirm-password" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Confirm Password" data-bn="পাসওয়ার্ড নিশ্চিত করুন">Confirm Password</label>
+                    <input type="password" id="auth-confirm-password" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
                 </div>
 
                 <div id="auth-error" class="text-red-500 text-sm hidden font-medium text-center"></div>
@@ -106,12 +108,10 @@
                     <button type="button" id="main-auth-btn" onclick="handleAuthAction()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">Login</button>
                     
                     <div class="flex justify-between items-center mt-3" id="wrap-forgot-pass">
-                        <button type="button" onclick="showScreen('forgot-pass-screen')" class="text-sm text-blue-600 font-bold hover:underline">Forgot Password?</button>
+                        <button type="button" onclick="showScreen('forgot-pass-screen')" class="text-sm text-blue-600 font-bold hover:underline" data-en="Forgot Password?" data-bn="পাসওয়ার্ড ভুলে গেছেন?">Forgot Password?</button>
                     </div>
 
-                    <p id="auth-toggle-text" class="text-sm text-gray-600 mt-4 text-center">
-                        Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>
-                    </p>
+                    <p id="auth-toggle-text" class="text-sm text-gray-600 mt-4 text-center"></p>
                 </div>
             </form>
         </div>
@@ -119,86 +119,92 @@
 
     <!-- PIN UNLOCK SCREEN -->
     <div id="pin-screen" class="absolute inset-0 bg-blue-600 z-[100] flex flex-col items-center justify-center p-4 hidden">
+        <button onclick="toggleLanguage()" class="lang-toggle-btn absolute top-4 right-4 text-xs font-bold text-blue-600 bg-white px-3 py-1 rounded-full shadow hover:bg-blue-50 z-10"></button>
+        
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">App Locked</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2" data-en="App Locked" data-bn="অ্যাপ লক করা আছে">App Locked</h2>
             <p class="text-gray-500 text-sm mb-6" id="unlock-email-display"></p>
 
             <div class="space-y-4">
                 <input type="password" id="unlock-pin" class="w-full border-2 border-gray-300 rounded-xl p-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500" placeholder="•••••" maxlength="5">
                 <div id="pin-error" class="text-red-500 text-sm hidden font-medium"></div>
-                <button type="button" onclick="unlockApp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all active:scale-95">Unlock App</button>
+                <button type="button" onclick="unlockApp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all active:scale-95" data-en="Unlock App" data-bn="অ্যাপ আনলক করুন">Unlock App</button>
             </div>
 
             <div class="mt-6 flex justify-between items-center text-sm">
-                <button onclick="showScreen('forgot-pin-screen')" class="text-blue-600 font-bold hover:underline">Forgot PIN?</button>
-                <button onclick="logoutUser()" class="text-red-500 font-bold hover:underline">Logout</button>
+                <button onclick="showScreen('forgot-pin-screen')" class="text-blue-600 font-bold hover:underline" data-en="Forgot PIN?" data-bn="পিন ভুলে গেছেন?">Forgot PIN?</button>
+                <button onclick="logoutUser()" class="text-red-500 font-bold hover:underline" data-en="Logout" data-bn="লগআউট">Logout</button>
             </div>
         </div>
     </div>
 
     <!-- FORGOT PASSWORD SCREEN -->
     <div id="forgot-pass-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Password Reset</h2>
-            <p class="text-sm text-gray-500 mb-4">Reset your password using security details</p>
+        <button onclick="toggleLanguage()" class="lang-toggle-btn absolute top-4 right-4 text-xs font-bold text-blue-600 bg-white px-3 py-1 rounded-full shadow border border-blue-200 hover:bg-blue-50 z-10"></button>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4" data-en="Password Reset" data-bn="পাসওয়ার্ড রিসেট">Password Reset</h2>
+            <p class="text-sm text-gray-500 mb-4" data-en="Reset your password using security details" data-bn="নিরাপত্তা তথ্য দিয়ে আপনার পাসওয়ার্ড রিসেট করুন">Reset your password using security details</p>
 
             <form class="space-y-3 text-left">
-                <div><label class="block text-xs font-medium">Email</label><input type="email" id="fp-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
-                <div><label class="block text-xs font-medium">5-Digit PIN</label><input type="number" id="fp-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium" data-en="Email" data-bn="ইমেইল">Email</label><input type="email" id="fp-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium" data-en="5-Digit PIN" data-bn="৫-ডিজিট পিন">5-Digit PIN</label><input type="number" id="fp-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
                 
                 <div class="border p-2 rounded-lg bg-gray-50">
-                    <label class="block text-xs font-medium mb-1">Security Question</label>
+                    <label class="block text-xs font-medium mb-1" data-en="Security Question" data-bn="নিরাপত্তা প্রশ্ন">Security Question</label>
                     <select id="fp-sec-q" class="w-full border rounded p-1 text-xs mb-2 outline-none">
-                        <option value="What is your mother's name?">What is your mother's name?</option>
-                        <option value="What is the name of your first school?">What is the name of your first school?</option>
-                        <option value="What is your favorite color?">What is your favorite color?</option>
+                        <option value="What is your mother's name?" data-en="What is your mother's name?" data-bn="আপনার মায়ের নাম কী?">What is your mother's name?</option>
+                        <option value="What is the name of your first school?" data-en="What is the name of your first school?" data-bn="আপনার প্রথম স্কুলের নাম কী?">What is the name of your first school?</option>
+                        <option value="What is your favorite color?" data-en="What is your favorite color?" data-bn="আপনার প্রিয় রঙ কী?">What is your favorite color?</option>
                     </select>
-                    <label class="block text-xs font-medium">Answer</label>
+                    <label class="block text-xs font-medium" data-en="Answer" data-bn="উত্তর">Answer</label>
                     <input type="text" id="fp-sec-a" class="w-full border rounded p-1 text-sm outline-none">
                 </div>
 
-                <div><label class="block text-xs font-medium">New Password</label><input type="password" id="fp-new-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234"></div>
-                <div><label class="block text-xs font-medium">Confirm New Password</label><input type="password" id="fp-confirm-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234"></div>
+                <div><label class="block text-xs font-medium" data-en="New Password" data-bn="নতুন পাসওয়ার্ড">New Password</label><input type="password" id="fp-new-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234"></div>
+                <div><label class="block text-xs font-medium" data-en="Confirm New Password" data-bn="নতুন পাসওয়ার্ড নিশ্চিত করুন">Confirm New Password</label><input type="password" id="fp-confirm-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234"></div>
                 
                 <div id="fp-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
 
-                <button type="button" onclick="submitForgotPass()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Reset Password</button>
-                <button type="button" onclick="showScreen('auth-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2">Back to Login</button>
+                <button type="button" onclick="submitForgotPass()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700" data-en="Reset Password" data-bn="পাসওয়ার্ড রিসেট করুন">Reset Password</button>
+                <button type="button" onclick="showScreen('auth-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2" data-en="Back to Login" data-bn="লগইন এ ফিরে যান">Back to Login</button>
             </form>
         </div>
     </div>
 
     <!-- FORGOT PIN SCREEN -->
     <div id="forgot-pin-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">PIN Reset</h2>
-            <p class="text-sm text-gray-500 mb-4">Reset your PIN using security details</p>
+        <button onclick="toggleLanguage()" class="lang-toggle-btn absolute top-4 right-4 text-xs font-bold text-blue-600 bg-white px-3 py-1 rounded-full shadow border border-blue-200 hover:bg-blue-50 z-10"></button>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4" data-en="PIN Reset" data-bn="পিন রিসেট">PIN Reset</h2>
+            <p class="text-sm text-gray-500 mb-4" data-en="Reset your PIN using security details" data-bn="নিরাপত্তা তথ্য দিয়ে আপনার পিন রিসেট করুন">Reset your PIN using security details</p>
 
             <form class="space-y-3 text-left">
-                <div><label class="block text-xs font-medium">Email</label><input type="email" id="fpin-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
-                <div><label class="block text-xs font-medium">Password</label><input type="password" id="fpin-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium" data-en="Email" data-bn="ইমেইল">Email</label><input type="email" id="fpin-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium" data-en="Password" data-bn="পাসওয়ার্ড">Password</label><input type="password" id="fpin-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
                 
                 <div class="border p-2 rounded-lg bg-gray-50">
-                    <label class="block text-xs font-medium mb-1">Security Question</label>
+                    <label class="block text-xs font-medium mb-1" data-en="Security Question" data-bn="নিরাপত্তা প্রশ্ন">Security Question</label>
                     <select id="fpin-sec-q" class="w-full border rounded p-1 text-xs mb-2 outline-none">
-                        <option value="What is your mother's name?">What is your mother's name?</option>
-                        <option value="What is the name of your first school?">What is the name of your first school?</option>
-                        <option value="What is your favorite color?">What is your favorite color?</option>
+                        <option value="What is your mother's name?" data-en="What is your mother's name?" data-bn="আপনার মায়ের নাম কী?">What is your mother's name?</option>
+                        <option value="What is the name of your first school?" data-en="What is the name of your first school?" data-bn="আপনার প্রথম স্কুলের নাম কী?">What is the name of your first school?</option>
+                        <option value="What is your favorite color?" data-en="What is your favorite color?" data-bn="আপনার প্রিয় রঙ কী?">What is your favorite color?</option>
                     </select>
-                    <label class="block text-xs font-medium">Answer</label>
+                    <label class="block text-xs font-medium" data-en="Answer" data-bn="উত্তর">Answer</label>
                     <input type="text" id="fpin-sec-a" class="w-full border rounded p-1 text-sm outline-none">
                 </div>
 
-                <div><label class="block text-xs font-medium">New 5-Digit PIN</label><input type="number" id="fpin-new-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345"></div>
-                <div><label class="block text-xs font-medium">Confirm New PIN</label><input type="number" id="fpin-confirm-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345"></div>
+                <div><label class="block text-xs font-medium" data-en="New 5-Digit PIN" data-bn="নতুন ৫-ডিজিট পিন">New 5-Digit PIN</label><input type="number" id="fpin-new-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345"></div>
+                <div><label class="block text-xs font-medium" data-en="Confirm New PIN" data-bn="নতুন পিন নিশ্চিত করুন">Confirm New PIN</label><input type="number" id="fpin-confirm-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345"></div>
                 
                 <div id="fpin-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
 
-                <button type="button" onclick="submitForgotPin()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Reset PIN</button>
-                <button type="button" onclick="showScreen('pin-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2">Back to Unlock Screen</button>
+                <button type="button" onclick="submitForgotPin()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700" data-en="Reset PIN" data-bn="পিন রিসেট করুন">Reset PIN</button>
+                <button type="button" onclick="showScreen('pin-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2" data-en="Back to Unlock Screen" data-bn="আনলক স্ক্রিনে ফিরে যান">Back to Unlock Screen</button>
             </form>
         </div>
     </div>
@@ -207,10 +213,11 @@
     <header id="main-header" class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center hidden">
         <h1 class="text-xl font-bold"><i class="fa-solid fa-wallet mr-2"></i> Info Holder</h1>
         <div class="flex items-center gap-3">
+            <button onclick="toggleLanguage()" class="lang-toggle-btn text-xs bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-50 shadow font-bold"></button>
             <button onclick="loadDataFromCloud()" class="text-xl text-white hover:text-blue-200 transition-colors" title="Refresh">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
-            <button onclick="logoutUser()" class="text-xs bg-red-500 px-3 py-1 rounded hover:bg-red-600 shadow font-bold">
+            <button onclick="logoutUser()" class="text-xs bg-red-500 px-3 py-1 rounded hover:bg-red-600 shadow font-bold" data-en="Logout" data-bn="লগআউট">
                 Logout
             </button>
         </div>
@@ -219,10 +226,7 @@
     <!-- Main Content List -->
     <main class="flex-1 overflow-y-auto p-4 pb-24 hidden relative" id="item-list">
         <!-- Ekhane sob saved info show korbe -->
-        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-gray-400">
-            <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
-            <p class="text-lg">No info available. Add new info!</p>
-        </div>
+        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-gray-400 mt-20"></div>
     </main>
 
     <!-- Floating Action Button (Add Info) -->
@@ -234,38 +238,39 @@
     <div id="add-modal" class="modal fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl h-[85vh] sm:h-auto overflow-y-auto relative">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h2 class="text-lg font-bold text-gray-800">Add New Info</h2>
+                <h2 class="text-lg font-bold text-gray-800" data-en="Add New Info" data-bn="নতুন তথ্য যোগ করুন">Add New Info</h2>
                 <button onclick="closeModal('add-modal')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
             </div>
             
             <form id="add-form" onsubmit="saveInfo(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title (Name)</label>
-                    <input type="text" id="info-title" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. NID Card / Brac Bank">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Title (Name)" data-bn="শিরোনাম (নাম)">Title (Name)</label>
+                    <input type="text" id="info-title" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. NID Card / Brac Bank" data-en="e.g. NID Card / Brac Bank" data-bn="যেমন: এনআইডি কার্ড / ব্র্যাক ব্যাংক">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Category" data-bn="ক্যাটাগরি">Category</label>
                     <select id="info-category" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="Document">📄 Document</option>
-                        <option value="Card">💳 Card Details</option>
-                        <option value="Bank">🏦 Bank Info</option>
-                        <option value="Other">📌 Other</option>
+                        <option value="Documents" data-en="📄 Documents" data-bn="📄 ডকুমেন্টস">📄 Documents</option>
+                        <option value="Card" data-en="💳 Card Details" data-bn="💳 কার্ডের বিবরণ">💳 Card Details</option>
+                        <option value="Bank" data-en="🏦 Bank Info" data-bn="🏦 ব্যাংক তথ্য">🏦 Bank Info</option>
+                        <option value="Bike/Car" data-en="🚗 Bike/Car" data-bn="🚗 বাইক/গাড়ি">🚗 Bike/Car</option>
+                        <option value="Other" data-en="📌 Other" data-bn="📌 অন্যান্য">📌 Other</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Details (Description)</label>
-                    <textarea id="info-details" rows="3" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Account no, PIN, or other details..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Details (Description)" data-bn="বিবরণ">Details (Description)</label>
+                    <textarea id="info-details" rows="3" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Account no, PIN, or other details..." data-en="Account no, PIN, or other details..." data-bn="অ্যাকাউন্ট নং, পিন বা অন্যান্য বিবরণ..."></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Google Drive Image Link (Optional)</label>
-                    <textarea id="info-image-links" rows="2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Paste link here. Use comma (,) for multiple links."></textarea>
-                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-circle-info"></i> Ensure 'Anyone with the link' is enabled on Google Drive.</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Google Drive Image Link (Optional)" data-bn="গুগল ড্রাইভ ইমেজ লিংক (ঐচ্ছিক)">Google Drive Image Link (Optional)</label>
+                    <textarea id="info-image-links" rows="2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Paste link here. Use comma (,) for multiple links." data-en="Paste link here. Use comma (,) for multiple links." data-bn="এখানে লিংক পেস্ট করুন। একাধিক লিংকের জন্য কমা (,) ব্যবহার করুন।"></textarea>
+                    <p class="text-xs text-gray-500 mt-1" data-en="<i class='fa-solid fa-circle-info'></i> Ensure 'Anyone with the link' is enabled on Google Drive." data-bn="<i class='fa-solid fa-circle-info'></i> ড্রাইভ থেকে 'Anyone with the link' অপশন চালু করে লিংক দিন।"><i class="fa-solid fa-circle-info"></i> Ensure 'Anyone with the link' is enabled on Google Drive.</p>
                 </div>
 
-                <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 mt-4 shadow-md transition-colors">
+                <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 mt-4 shadow-md transition-colors" data-en="Save Info" data-bn="তথ্য সেভ করুন">
                     Save Info
                 </button>
             </form>
@@ -285,7 +290,7 @@
     <!-- FULLSCREEN IMAGE VIEWER MODAL -->
     <div id="image-viewer-modal" class="modal fixed inset-0 z-[60] flex items-center justify-center bg-black">
         <button onclick="closeImageViewer()" class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center text-2xl z-[70]">&times;</button>
-        <div class="absolute top-4 left-4 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full text-xs z-[70]">
+        <div class="absolute top-4 left-4 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full text-xs z-[70]" data-en="Double Tap to Zoom, Drag to Pan" data-bn="জুম করতে ডাবল ট্যাপ করুন, সরাতে ড্র্যাগ করুন">
             Double Tap to Zoom, Drag to Pan
         </div>
         
@@ -298,11 +303,17 @@
     <div id="delete-modal" class="modal fixed inset-0 z-[80] flex items-center justify-center bg-black bg-opacity-50 p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl relative text-center">
             <i class="fa-solid fa-triangle-exclamation text-red-500 text-5xl mb-4"></i>
-            <h2 class="text-xl font-bold text-gray-800 mb-2">Warning</h2>
-            <p class="text-gray-600 text-sm mb-6">Are you sure you want to delete this? This cannot be undone.</p>
+            <h2 class="text-xl font-bold text-gray-800 mb-2" data-en="Warning" data-bn="সতর্কতা">Warning</h2>
+            <p class="text-gray-600 text-sm mb-4" data-en="Are you sure you want to delete this? This cannot be undone." data-bn="আপনি কি নিশ্চিত এটি মুছে ফেলতে চান? এটি আর ফিরে পাওয়া যাবে না।">Are you sure you want to delete this? This cannot be undone.</p>
+            
+            <div class="mb-6">
+                <input type="password" id="delete-pin-input" class="w-full border-2 border-gray-300 rounded-xl p-2 text-center text-xl tracking-[0.5em] outline-none focus:border-red-500" placeholder="•••••" maxlength="5">
+                <div id="delete-pin-error" class="text-red-500 text-xs mt-2 hidden font-medium"></div>
+            </div>
+
             <div class="flex gap-3">
-                <button onclick="closeModal('delete-modal')" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                <button onclick="executeDelete()" class="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700">Yes, Delete</button>
+                <button onclick="closeModal('delete-modal')" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300" data-en="Cancel" data-bn="বাতিল">Cancel</button>
+                <button onclick="executeDelete()" class="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700" data-en="Yes, Delete" data-bn="হ্যাঁ, মুছে ফেলুন">Yes, Delete</button>
             </div>
         </div>
     </div>
@@ -316,7 +327,6 @@
 </div>
 
 <script>
-    // 👇👇 EKHANE NOTUN DEPLOY KORA WEB APP URL TI BOSAN 👇👇
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUKb1wNqtRgOv2m_k1TlKvRLJRPhOYo9iZuYPP5uDERInxlWaOSYJkEo4-R8puzcW79w/exec"; 
 
     // --- State Variables ---
@@ -325,6 +335,105 @@
     let currentImageIndex = 0;
     let currentUser = localStorage.getItem('ih_user') || null;
     let itemToDelete = null;
+    let isLoginMode = true;
+
+    // --- Language Management ---
+    let currentLang = localStorage.getItem('ih_lang') || 'en';
+    
+    const t = (enText) => {
+        if(currentLang === 'en') return enText;
+        const dict = {
+            "Logging in...": "লগইন হচ্ছে...",
+            "Please enter Email and Password.": "অনুগ্রহ করে ইমেইল এবং পাসওয়ার্ড দিন।",
+            "Login failed! Enter correct email/password.": "লগইন ব্যর্থ হয়েছে! সঠিক ইমেইল/পাসওয়ার্ড দিন।",
+            "Login failed!": "লগইন ব্যর্থ হয়েছে!",
+            "Name must be in 'First Last' format (e.g., John Doe).": "নাম 'First Last' ফরম্যাটে হতে হবে (যেমন, আব্দুর রহমান)।",
+            "Please enter a valid email address.": "অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা দিন।",
+            "PIN must be exactly 5 digits.": "পিন অবশ্যই ৫ ডিজিটের হতে হবে।",
+            "Please answer the security question.": "অনুগ্রহ করে নিরাপত্তা প্রশ্নের উত্তর দিন।",
+            "Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char.": "পাসওয়ার্ড ৮-১৫ অক্ষরের হতে হবে, যার মধ্যে ১টি বড় হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর থাকতে হবে।",
+            "Passwords do not match!": "পাসওয়ার্ড মিলেনি!",
+            "Creating account...": "অ্যাকাউন্ট তৈরি হচ্ছে...",
+            "Signup successful!": "সফলভাবে সাইনআপ হয়েছে!",
+            "Please enter a valid 5-digit PIN.": "অনুগ্রহ করে সঠিক ৫-ডিজিটের পিন দিন।",
+            "Unlocking...": "আনলক হচ্ছে...",
+            "Incorrect PIN.": "পিন ভুল হয়েছে!",
+            "Please fill in all details.": "সব তথ্য পূরণ করুন।",
+            "New Password must be 8-15 chars, 1 uppercase, 1 number, 1 special char.": "নতুন পাসওয়ার্ড ৮-১৫ অক্ষরের হতে হবে, ১টি বড় হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর থাকতে হবে।",
+            "Resetting Password...": "পাসওয়ার্ড রিসেট হচ্ছে...",
+            "Password changed successfully! Please login.": "সফলভাবে পাসওয়ার্ড পরিবর্তন করা হয়েছে! অনুগ্রহ করে লগইন করুন।",
+            "New PINs do not match!": "নতুন পিন দুটি মিলেনি!",
+            "New PIN must be exactly 5 digits.": "নতুন পিন অবশ্যই ৫ ডিজিটের হতে হবে।",
+            "Resetting PIN...": "পিন রিসেট হচ্ছে...",
+            "PIN changed successfully! Please unlock the app.": "সফলভাবে পিন পরিবর্তন করা হয়েছে! অনুগ্রহ করে অ্যাপ আনলক করুন।",
+            "Saving to Sheet...": "সেভ হচ্ছে...",
+            "Failed to save!": "সেভ করতে সমস্যা হয়েছে!",
+            "Loading data...": "ডেটা লোড হচ্ছে...",
+            "Deleting...": "মুছে ফেলা হচ্ছে...",
+            "Failed to delete!": "মুছে ফেলতে ব্যর্থ হয়েছে!",
+            "Google Apps Script URL is missing!": "Google Apps Script URL দেওয়া নেই!",
+            "Google Apps Script is not updated! Please deploy the new version.": "Google Apps Script আপডেট করা হয়নি! অনুগ্রহ করে নতুন ভার্সন ডিপ্লয় করুন।",
+            "Network/CORS Error: Check Script URL and ensure 'Anyone' has access.": "নেটওয়ার্ক/CORS এরর: স্ক্রিপ্ট URL চেক করুন এবং 'Anyone' এক্সেস নিশ্চিত করুন।",
+            "This email is already registered.": "এই ইমেইলটি আগে থেকেই নিবন্ধিত।",
+            "Incorrect password.": "পাসওয়ার্ড ভুল হয়েছে।",
+            "Email not found.": "ইমেইল পাওয়া যায়নি।",
+            "User not found.": "ব্যবহারকারী পাওয়া যায়নি।",
+            "Details do not match. Check PIN and Security Answer.": "তথ্য মিলেনি! সঠিক পিন ও নিরাপত্তা উত্তর দিন।",
+            "Details do not match. Check Password and Security Answer.": "তথ্য মিলেনি! সঠিক পাসওয়ার্ড ও নিরাপত্তা উত্তর দিন।",
+            "Invalid action.": "ভুল অ্যাকশন।"
+        };
+        return dict[enText] || enText;
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'bn' : 'en';
+        localStorage.setItem('ih_lang', currentLang);
+        applyLanguage();
+    }
+
+    function applyLanguage() {
+        const btnText = currentLang === 'en' ? 'বাংলা' : 'English';
+        document.querySelectorAll('.lang-toggle-btn').forEach(btn => btn.innerText = btnText);
+
+        document.querySelectorAll('[data-en]').forEach(el => {
+            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = el.getAttribute(`data-${currentLang}`);
+            } else if (el.tagName === 'OPTION') {
+                el.innerText = el.getAttribute(`data-${currentLang}`);
+            } else {
+                el.innerHTML = el.getAttribute(`data-${currentLang}`);
+            }
+        });
+
+        updateDynamicTexts();
+    }
+
+    function updateDynamicTexts() {
+        if(isLoginMode) {
+            document.getElementById('auth-title').innerText = currentLang === 'en' ? "Login" : "লগইন করুন";
+            document.getElementById('main-auth-btn').innerText = currentLang === 'en' ? "Login" : "লগইন";
+            document.getElementById('auth-toggle-text').innerHTML = currentLang === 'en' 
+                ? `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>`
+                : `অ্যাকাউন্ট নেই? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">নতুন অ্যাকাউন্ট খুলুন</button>`;
+        } else {
+            document.getElementById('auth-title').innerText = currentLang === 'en' ? "Create Account" : "নতুন অ্যাকাউন্ট খুলুন";
+            document.getElementById('main-auth-btn').innerText = currentLang === 'en' ? "Sign Up" : "সাইন আপ করুন";
+            document.getElementById('auth-toggle-text').innerHTML = currentLang === 'en' 
+                ? `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Login</button>`
+                : `আগেই অ্যাকাউন্ট আছে? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">লগইন করুন</button>`;
+        }
+        
+        const emptyState = document.getElementById('empty-state');
+        if(emptyState) {
+            emptyState.innerHTML = currentLang === 'en'
+                ? `<i class="fa-solid fa-folder-open text-6xl mb-4"></i><p class="text-lg">No info available. Add new info!</p>`
+                : `<i class="fa-solid fa-folder-open text-6xl mb-4"></i><p class="text-lg">কোনো তথ্য নেই। নতুন তথ্য যোগ করুন!</p>`;
+        }
+
+        if (savedInfos.length > 0) {
+            renderItems();
+        }
+    }
 
     if(SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
         document.getElementById('config-warning').classList.remove('hidden');
@@ -338,11 +447,14 @@
         showScreen('auth-screen');
     }
 
+    // Initialize UI language on load
+    applyLanguage();
+
     // --- Core API Function ---
     async function callAppsScript(action, payload = {}) {
         if(SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-            alert("Google Apps Script URL is missing!");
-            throw new Error("Missing URL");
+            alert(t("Google Apps Script URL is missing!"));
+            throw new Error(t("Missing URL"));
         }
         
         const requestData = { action: action, ...payload };
@@ -360,15 +472,15 @@
             
             if(!result.success) {
                 if (result.message === "Unknown error") {
-                    throw new Error("Google Apps Script is not updated! Please deploy the new version.");
+                    throw new Error(t("Google Apps Script is not updated! Please deploy the new version."));
                 }
-                throw new Error(result.message || "Unknown error occurred");
+                throw new Error(t(result.message) || t("Unknown error occurred"));
             }
             return result;
         } catch (error) {
             console.error("API Error:", error);
             if (error.message.includes('Failed to fetch')) {
-                throw new Error("Network/CORS Error: Check Script URL and ensure 'Anyone' has access.");
+                throw new Error(t("Network/CORS Error: Check Script URL and ensure 'Anyone' has access."));
             }
             throw error;
         }
@@ -412,6 +524,10 @@
         if(id === 'add-modal') {
             document.getElementById('add-form').reset();
         }
+        if(id === 'delete-modal') {
+            document.getElementById('delete-pin-input').value = '';
+            document.getElementById('delete-pin-error').classList.add('hidden');
+        }
     };
 
     function showAuthError(msg, elementId = 'auth-error') {
@@ -430,12 +546,8 @@
     }
 
     // --- Auth Functions ---
-    let isLoginMode = true;
-
     window.toggleAuthMode = () => {
         isLoginMode = !isLoginMode;
-        document.getElementById('auth-title').innerText = isLoginMode ? "Login" : "Create Account";
-        document.getElementById('main-auth-btn').innerText = isLoginMode ? "Login" : "Sign Up";
         
         // Show/Hide Fields based on mode
         if(isLoginMode) {
@@ -452,10 +564,7 @@
             document.getElementById('wrap-forgot-pass').classList.add('hidden');
         }
         
-        const bottomText = isLoginMode 
-            ? `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>`
-            : `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Login</button>`;
-        document.getElementById('auth-toggle-text').innerHTML = bottomText;
+        updateDynamicTexts();
         document.getElementById('auth-error').classList.add('hidden');
         hideAuthSuccess();
     };
@@ -468,22 +577,20 @@
     window.loginUser = async () => {
         const email = document.getElementById('auth-email').value.trim();
         const pass = document.getElementById('auth-password').value;
-        if(!email || !pass) { showAuthError("Please enter Email and Password."); return; }
+        if(!email || !pass) { showAuthError(t("Please enter Email and Password.")); return; }
         
-        showLoader("Logging in...");
+        showLoader(t("Logging in..."));
         try {
             await callAppsScript('login', { username: email, password: pass });
             currentUser = email;
             localStorage.setItem('ih_user', email);
             document.getElementById('auth-error').classList.add('hidden');
             
-            // Go to PIN unlock screen instead of main
             document.getElementById('unlock-email-display').innerText = currentUser;
             showScreen('pin-screen');
             
         } catch(error) {
-            // Ekhon theke backend theke asha exact English error message dekhabe
-            showAuthError(error.message || "Login failed!");
+            showAuthError(error.message || t("Login failed! Enter correct email/password."));
         } finally { hideLoader(); }
     };
 
@@ -496,29 +603,28 @@
         const pass = document.getElementById('auth-password').value;
         const confirmPass = document.getElementById('auth-confirm-password').value;
 
-        // Validations
         const nameRegex = /^[A-Z][a-z]+\s[A-Z][a-z]+$/;
-        if(!nameRegex.test(name)) { showAuthError("Name must be in 'First Last' format (e.g., John Doe)."); return; }
+        if(!nameRegex.test(name)) { showAuthError(t("Name must be in 'First Last' format (e.g., John Doe).")); return; }
         
-        if(!email.includes('@') || !email.includes('.')) { showAuthError("Please enter a valid email address."); return; }
+        if(!email.includes('@') || !email.includes('.')) { showAuthError(t("Please enter a valid email address.")); return; }
         
-        if(!/^\d{5}$/.test(pin)) { showAuthError("PIN must be exactly 5 digits."); return; }
+        if(!/^\d{5}$/.test(pin)) { showAuthError(t("PIN must be exactly 5 digits.")); return; }
         
-        if(!secA) { showAuthError("Please answer the security question."); return; }
+        if(!secA) { showAuthError(t("Please answer the security question.")); return; }
 
         const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
-        if(!passRegex.test(pass)) { showAuthError("Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char."); return; }
+        if(!passRegex.test(pass)) { showAuthError(t("Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char.")); return; }
 
-        if(pass !== confirmPass) { showAuthError("Passwords do not match!"); return; }
+        if(pass !== confirmPass) { showAuthError(t("Passwords do not match!")); return; }
 
-        showLoader("Creating account...");
+        showLoader(t("Creating account..."));
         try {
             await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
             currentUser = email;
             localStorage.setItem('ih_user', email);
             document.getElementById('auth-error').classList.add('hidden');
             
-            showAuthSuccess("Signup successful!");
+            showAuthSuccess(t("Signup successful!"));
             
             setTimeout(() => {
                 hideAuthSuccess();
@@ -533,9 +639,9 @@
 
     window.unlockApp = async () => {
         const pin = document.getElementById('unlock-pin').value.trim();
-        if(!/^\d{5}$/.test(pin)) { showAuthError("Please enter a valid 5-digit PIN.", "pin-error"); return; }
+        if(!/^\d{5}$/.test(pin)) { showAuthError(t("Please enter a valid 5-digit PIN."), "pin-error"); return; }
         
-        showLoader("Unlocking...");
+        showLoader(t("Unlocking..."));
         try {
             await callAppsScript('verify_pin', { username: currentUser, pin: pin });
             document.getElementById('pin-error').classList.add('hidden');
@@ -543,68 +649,7 @@
             showScreen('main');
             loadDataFromCloud();
         } catch(error) {
-            // Ekhon theke backend er error ashbe ("Incorrect PIN.")
-            showAuthError(error.message || "Incorrect PIN.", "pin-error");
-        } finally { hideLoader(); }
-    };
-
-    window.signupUser = async () => {
-        const name = document.getElementById('auth-name').value.trim();
-        const email = document.getElementById('auth-email').value.trim();
-        const pin = document.getElementById('auth-pin').value.trim();
-        const secQ = document.getElementById('auth-sec-q').value;
-        const secA = document.getElementById('auth-sec-a').value.trim();
-        const pass = document.getElementById('auth-password').value;
-        const confirmPass = document.getElementById('auth-confirm-password').value;
-
-        // Validations
-        const nameRegex = /^[A-Z][a-z]+\s[A-Z][a-z]+$/;
-        if(!nameRegex.test(name)) { showAuthError("Name must be in 'First Last' format (e.g., John Doe)."); return; }
-        
-        if(!email.includes('@') || !email.includes('.')) { showAuthError("Please enter a valid email address."); return; }
-        
-        if(!/^\d{5}$/.test(pin)) { showAuthError("PIN must be exactly 5 digits."); return; }
-        
-        if(!secA) { showAuthError("Please answer the security question."); return; }
-
-        const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
-        if(!passRegex.test(pass)) { showAuthError("Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char."); return; }
-
-        if(pass !== confirmPass) { showAuthError("Passwords do not match!"); return; }
-
-        showLoader("Creating account...");
-        try {
-            await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
-            currentUser = email;
-            localStorage.setItem('ih_user', email);
-            document.getElementById('auth-error').classList.add('hidden');
-            
-            showAuthSuccess("Signup successful!");
-            
-            setTimeout(() => {
-                hideAuthSuccess();
-                document.getElementById('unlock-email-display').innerText = currentUser;
-                showScreen('pin-screen');
-            }, 1500);
-
-        } catch(error) {
-            showAuthError(error.message);
-        } finally { hideLoader(); }
-    };
-
-    window.unlockApp = async () => {
-        const pin = document.getElementById('unlock-pin').value.trim();
-        if(!/^\d{5}$/.test(pin)) { showAuthError("Please enter a valid 5-digit PIN.", "pin-error"); return; }
-        
-        showLoader("Unlocking...");
-        try {
-            await callAppsScript('verify_pin', { username: currentUser, pin: pin });
-            document.getElementById('pin-error').classList.add('hidden');
-            document.getElementById('unlock-pin').value = '';
-            showScreen('main');
-            loadDataFromCloud();
-        } catch(error) {
-            showAuthError("Incorrect PIN!", "pin-error");
+            showAuthError(error.message || t("Incorrect PIN."), "pin-error");
         } finally { hideLoader(); }
     };
 
@@ -616,22 +661,21 @@
         const newPass = document.getElementById('fp-new-pass').value;
         const confirmNewPass = document.getElementById('fp-confirm-pass').value;
 
-        if(!email || !pin || !secA || !newPass || !confirmNewPass) { showAuthError("Please fill in all details.", "fp-error"); return; }
-        if(newPass !== confirmNewPass) { showAuthError("Passwords do not match!", "fp-error"); return; }
+        if(!email || !pin || !secA || !newPass || !confirmNewPass) { showAuthError(t("Please fill in all details."), "fp-error"); return; }
+        if(newPass !== confirmNewPass) { showAuthError(t("Passwords do not match!"), "fp-error"); return; }
         
         const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
-        if(!passRegex.test(newPass)) { showAuthError("New Password must be 8-15 chars, 1 uppercase, 1 number, 1 special char.", "fp-error"); return; }
+        if(!passRegex.test(newPass)) { showAuthError(t("New Password must be 8-15 chars, 1 uppercase, 1 number, 1 special char."), "fp-error"); return; }
 
-        showLoader("Resetting Password...");
+        showLoader(t("Resetting Password..."));
         try {
             await callAppsScript('reset_password', { username: email, pin: pin, secQ: secQ, secA: secA, newPassword: newPass });
             document.getElementById('fp-error').classList.add('hidden');
             
-            // Clear fields
             document.getElementById('fp-new-pass').value = '';
             document.getElementById('fp-confirm-pass').value = '';
             
-            alert("Password changed successfully! Please login.");
+            alert(t("Password changed successfully! Please login."));
             showScreen('auth-screen');
         } catch(error) {
             showAuthError(error.message, "fp-error");
@@ -646,20 +690,19 @@
         const newPin = document.getElementById('fpin-new-pin').value.trim();
         const confirmNewPin = document.getElementById('fpin-confirm-pin').value.trim();
 
-        if(!email || !pass || !secA || !newPin || !confirmNewPin) { showAuthError("Please fill in all details.", "fpin-error"); return; }
-        if(newPin !== confirmNewPin) { showAuthError("New PINs do not match!", "fpin-error"); return; }
-        if(!/^\d{5}$/.test(newPin)) { showAuthError("New PIN must be exactly 5 digits.", "fpin-error"); return; }
+        if(!email || !pass || !secA || !newPin || !confirmNewPin) { showAuthError(t("Please fill in all details."), "fpin-error"); return; }
+        if(newPin !== confirmNewPin) { showAuthError(t("New PINs do not match!"), "fpin-error"); return; }
+        if(!/^\d{5}$/.test(newPin)) { showAuthError(t("New PIN must be exactly 5 digits."), "fpin-error"); return; }
 
-        showLoader("Resetting PIN...");
+        showLoader(t("Resetting PIN..."));
         try {
             await callAppsScript('reset_pin', { username: email, password: pass, secQ: secQ, secA: secA, newPin: newPin });
             document.getElementById('fpin-error').classList.add('hidden');
             
-            // Clear fields
             document.getElementById('fpin-new-pin').value = '';
             document.getElementById('fpin-confirm-pin').value = '';
             
-            alert("PIN changed successfully! Please unlock the app.");
+            alert(t("PIN changed successfully! Please unlock the app."));
             showScreen('pin-screen');
         } catch(error) {
             showAuthError(error.message, "fpin-error");
@@ -672,37 +715,31 @@
         savedInfos = [];
         document.getElementById('unlock-pin').value = '';
         
-        // Force fully back to Login Mode
         isLoginMode = true;
-        document.getElementById('auth-title').innerText = "Login";
-        document.getElementById('main-auth-btn').innerText = "Login";
         document.getElementById('wrap-name').classList.add('hidden');
         document.getElementById('wrap-pin').classList.add('hidden');
         document.getElementById('wrap-sec-q').classList.add('hidden');
         document.getElementById('wrap-confirm-pass').classList.add('hidden');
         document.getElementById('wrap-forgot-pass').classList.remove('hidden');
-        document.getElementById('auth-toggle-text').innerHTML = `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>`;
         document.getElementById('auth-error').classList.add('hidden');
         hideAuthSuccess();
+        updateDynamicTexts();
         
         showScreen('auth-screen');
     };
 
     // --- Data Processing Functions ---
-
-    // Drive link ke direct image link e convert kora
     function processDriveLinks(inputStr) {
         if(!inputStr) return null;
         let links = inputStr.split(',').map(s => s.trim()).filter(s => s !== '');
         if(links.length === 0) return null;
 
         return links.map(url => {
-            // Check if it's a standard drive link
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
             }
-            return url; // return as is if not a standard format
+            return url;
         });
     }
 
@@ -727,35 +764,33 @@
             timestamp: Date.now()
         };
 
-        showLoader("Saving to Sheet...");
+        showLoader(t("Saving to Sheet..."));
         try {
             await callAppsScript('add', newData);
             window.closeModal('add-modal');
-            loadDataFromCloud(); // Refresh data
+            loadDataFromCloud();
         } catch (error) {
-            alert(error.message || "Failed to save!");
+            alert(error.message || t("Failed to save!"));
         } finally { hideLoader(); }
     };
 
     window.loadDataFromCloud = async () => {
         if (!currentUser) return;
         
-        showLoader("Loading data...");
+        showLoader(t("Loading data..."));
         try {
             const result = await callAppsScript('load', { username: currentUser });
             savedInfos = result.data || [];
-            // Sort by latest added
             savedInfos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             renderItems();
 
-            // Auto Cache (Download) images in background for offline/faster loading
             savedInfos.forEach(item => {
                 if(item.imageLinks) {
                     try {
                         const links = JSON.parse(item.imageLinks);
                         links.forEach(src => {
                             const img = new Image();
-                            img.src = src; // Natively downloads and caches the image
+                            img.src = src; 
                         });
                     } catch(e){}
                 }
@@ -769,29 +804,44 @@
     window.confirmDelete = (id, event) => {
         event.stopPropagation();
         itemToDelete = id;
+        document.getElementById('delete-pin-input').value = '';
+        document.getElementById('delete-pin-error').classList.add('hidden');
         window.openModal('delete-modal');
     };
 
     window.executeDelete = async () => {
         if(!itemToDelete || !currentUser) return;
         
-        showLoader("Deleting...");
+        const pinInput = document.getElementById('delete-pin-input').value.trim();
+        const errDiv = document.getElementById('delete-pin-error');
+        
+        if(!/^\d{5}$/.test(pinInput)) {
+            errDiv.innerText = t("Please enter a valid 5-digit PIN.");
+            errDiv.classList.remove('hidden');
+            return;
+        }
+
+        showLoader(t("Deleting..."));
         try {
+            await callAppsScript('verify_pin', { username: currentUser, pin: pinInput });
             await callAppsScript('delete', { username: currentUser, id: itemToDelete });
             window.closeModal('delete-modal');
             window.closeModal('view-modal');
             itemToDelete = null;
-            loadDataFromCloud(); // Refresh list
+            loadDataFromCloud(); 
         } catch (error) {
-            alert("Failed to delete!");
+            errDiv.innerText = error.message || t("Incorrect PIN.");
+            errDiv.classList.remove('hidden');
         } finally { hideLoader(); }
     };
 
     function getCategoryIcon(category) {
         switch(category) {
+            case 'Documents': 
             case 'Document': return '<i class="fa-solid fa-file-lines text-blue-500"></i>';
             case 'Card': return '<i class="fa-solid fa-credit-card text-purple-500"></i>';
             case 'Bank': return '<i class="fa-solid fa-building-columns text-green-500"></i>';
+            case 'Bike/Car': return '<i class="fa-solid fa-car text-orange-500"></i>';
             default: return '<i class="fa-solid fa-paperclip text-gray-500"></i>';
         }
     }
@@ -804,10 +854,12 @@
             listContainer.innerHTML = `
                 <div id="empty-state" class="flex flex-col items-center justify-center h-full text-gray-400 mt-20">
                     <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
-                    <p class="text-lg">No info available. Add new info!</p>
+                    <p class="text-lg">${currentLang === 'en' ? "No info available. Add new info!" : "কোনো তথ্য নেই। নতুন তথ্য যোগ করুন!"}</p>
                 </div>`;
             return;
         }
+
+        let errorText = currentLang === 'en' ? "Link Error or Private" : "লিংক এরর বা প্রাইভেট";
 
         savedInfos.forEach(item => {
             const card = document.createElement('div');
@@ -823,7 +875,7 @@
 
             let topMedia = '';
             if (displayImages.length > 0) {
-                topMedia = `<img src="${displayImages[0]}" onerror="this.outerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fa-solid fa-image-slash text-4xl\\'></i><p class=\\'text-xs mt-2\\'>Link Error or Private</p></div>'" class="w-full h-48 object-cover border-b border-gray-100 bg-gray-50">`;
+                topMedia = `<img src="${displayImages[0]}" onerror="this.outerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fa-solid fa-image-slash text-4xl\\'></i><p class=\\'text-xs mt-2\\'>${errorText}</p></div>'" class="w-full h-48 object-cover border-b border-gray-100 bg-gray-50">`;
             } else {
                 topMedia = `
                     <div class="w-full h-48 bg-gray-50 flex flex-col items-center justify-center text-6xl border-b border-gray-100 opacity-80">
@@ -864,29 +916,34 @@
         
         let imageHtml = '';
         if(displayImages.length > 0) {
+            let flipText = currentLang === 'en' ? "Flip Image" : "ছবি উল্টান";
             let flipBtn = displayImages.length > 1 ? 
                 `<button onclick="flipImage(event)" class="mt-3 w-full bg-blue-50 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200">
-                    <i class="fa-solid fa-rotate"></i> Flip Image (${currentImageIndex + 1}/${displayImages.length})
+                    <i class="fa-solid fa-rotate"></i> ${flipText} (${currentImageIndex + 1}/${displayImages.length})
                 </button>` : '';
 
+            let imgErrorText = currentLang === 'en' ? "Image Error" : "ছবি এরর";
             imageHtml = `
                 <div class="mt-4">
                     <div class="border rounded-lg overflow-hidden relative bg-gray-100 cursor-pointer" onclick="openCurrentImageViewer()">
-                        <img id="popup-view-img" src="${displayImages[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23eee\\'/><text x=\\'50\\' y=\\'50\\' font-family=\\'Arial\\' font-size=\\'10\\' text-anchor=\\'middle\\' alignment-baseline=\\'middle\\'>Image Error</text></svg>'" class="w-full h-40 object-cover">
+                        <img id="popup-view-img" src="${displayImages[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23eee\\'/><text x=\\'50\\' y=\\'50\\' font-family=\\'Arial\\' font-size=\\'10\\' text-anchor=\\'middle\\' alignment-baseline=\\'middle\\'>${imgErrorText}</text></svg>'" class="w-full h-40 object-cover">
                     </div>
                     ${flipBtn}
                 </div>
             `;
         }
 
+        let catText = currentLang === 'en' ? 'Category' : 'ক্যাটাগরি';
+        let noDetailsText = currentLang === 'en' ? "No text details available." : "কোনো টেক্সট বিবরণ নেই।";
+
         content.innerHTML = `
             <div class="flex items-center gap-3 mb-2">
                 <div class="text-2xl">${getCategoryIcon(item.category)}</div>
                 <h2 class="text-xl font-bold text-gray-800">${item.title}</h2>
             </div>
-            <p class="text-sm text-gray-500 mb-4 border-b pb-2">Category: ${item.category}</p>
+            <p class="text-sm text-gray-500 mb-4 border-b pb-2">${catText}: ${item.category}</p>
             
-            <div class="bg-gray-50 p-3 rounded-lg min-h-[80px] whitespace-pre-wrap text-gray-700">${item.details || 'No text details available.'}</div>
+            <div class="bg-gray-50 p-3 rounded-lg min-h-[80px] whitespace-pre-wrap text-gray-700">${item.details || noDetailsText}</div>
             
             ${imageHtml}
         `;
@@ -915,8 +972,9 @@
         }
         
         const flipBtn = event.currentTarget;
+        let flipText = currentLang === 'en' ? "Flip Image" : "ছবি উল্টান";
         if(flipBtn) {
-            flipBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Flip Image (${currentImageIndex + 1}/${displayImages.length})`;
+            flipBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> ${flipText} (${currentImageIndex + 1}/${displayImages.length})`;
         }
     };
 
@@ -935,6 +993,7 @@
     const zoomImg = document.getElementById('zoomable-img');
     let scale = 1, pointX = 0, pointY = 0, startX = 0, startY = 0;
     let panning = false, lastTapTime = 0;
+    let initialDistance = 0, initialScale = 1;
 
     window.openImageViewer = (src) => {
         zoomImg.src = src;
@@ -957,29 +1016,47 @@
     }
 
     zoomImg.addEventListener('touchstart', function(e) {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTapTime;
-        if (tapLength < 300 && tapLength > 0) {
-            scale = scale === 1 ? 2.5 : 1;
-            if(scale === 1) { pointX = 0; pointY = 0; }
-            updateTransform();
-            e.preventDefault();
-        } else {
-            if (scale > 1) {
-                panning = true;
-                startX = e.touches[0].clientX - pointX;
-                startY = e.touches[0].clientY - pointY;
+        if (e.touches.length === 2) {
+            // 2 Angul diye Zoom (Pinch)
+            initialDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialScale = scale;
+            panning = false;
+        } else if (e.touches.length === 1) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            if (tapLength < 300 && tapLength > 0) {
+                scale = scale === 1 ? 2.5 : 1;
+                if(scale === 1) { pointX = 0; pointY = 0; }
+                updateTransform();
+                e.preventDefault();
+            } else {
+                if (scale > 1) {
+                    panning = true;
+                    startX = e.touches[0].clientX - pointX;
+                    startY = e.touches[0].clientY - pointY;
+                }
             }
+            lastTapTime = currentTime;
         }
-        lastTapTime = currentTime;
     }, {passive: false});
 
     zoomImg.addEventListener('touchmove', function(e) {
-        if (!panning) return;
-        e.preventDefault();
-        pointX = e.touches[0].clientX - startX;
-        pointY = e.touches[0].clientY - startY;
-        updateTransform();
+        e.preventDefault(); // Prevent scrolling screen
+        if (e.touches.length === 2) {
+            const currentDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            scale = Math.min(Math.max(1, initialScale * (currentDistance / initialDistance)), 4);
+            updateTransform();
+        } else if (e.touches.length === 1 && panning) {
+            pointX = e.touches[0].clientX - startX;
+            pointY = e.touches[0].clientY - startY;
+            updateTransform();
+        }
     }, {passive: false});
 
     zoomImg.addEventListener('touchend', () => panning = false);
@@ -1032,14 +1109,12 @@
         ]
     };
     
-    // Inject Manifest
     const manifestBlob = new Blob([JSON.stringify(manifestJSON)], {type: 'application/json'});
     const manifestLink = document.createElement('link');
     manifestLink.rel = 'manifest';
     manifestLink.href = URL.createObjectURL(manifestBlob);
     document.head.appendChild(manifestLink);
     
-    // Inject Theme Color & Apple Icon
     const metaTheme = document.createElement('meta');
     metaTheme.name = 'theme-color';
     metaTheme.content = '#2563eb';
@@ -1050,7 +1125,6 @@
     appleIcon.href = appIcon;
     document.head.appendChild(appleIcon);
 
-    // Dummy Service Worker to satisfy PWA install criteria
     const swCode = `self.addEventListener('fetch', () => {});`;
     const swBlob = new Blob([swCode], {type: 'application/javascript'});
     if ('serviceWorker' in navigator) {
