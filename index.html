@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Info Holder</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .fab { position: fixed; bottom: 24px; right: calc(50% - 216px + 24px); z-index: 40; }
+        @media (max-width: 480px) { .fab { right: 24px; } }
+        .modal { transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; pointer-events: none; transform: translateY(20px); }
+        .modal.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        #image-viewer-modal { background-color: #000; }
+        #zoomable-img { transition: transform 0.1s ease-out; transform-origin: center center; will-change: transform; max-width: 100%; max-height: 100%; object-fit: contain; }
+        @keyframes flipImageAnim { 0% { transform: rotateY(90deg); opacity: 0; } 100% { transform: rotateY(0deg); opacity: 1; } }
+        .flip-animation { animation: flipImageAnim 0.3s ease-out; }
+        
+        /* Loading overlay for API calls */
+        #global-loader { backdrop-filter: blur(2px); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+<div class="app-container flex flex-col h-screen relative">
+    
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center relative max-h-[90vh] overflow-y-auto">
+            <div id="config-warning" class="hidden absolute -top-16 left-0 right-0 bg-red-100 text-red-700 p-2 rounded-lg text-xs shadow">
+                ⚠️ SCRIPT_URL missing in code!
+            </div>
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shrink-0">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <h2 id="auth-title" class="text-2xl font-bold text-gray-800 mb-6">Login</h2>
+
+            <form id="auth-form" class="space-y-4 text-left">
+                <!-- Name (Signup Only) -->
+                <div id="wrap-name" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="auth-name" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="e.g. John Doe">
+                </div>
+
+                <!-- Email (Both) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="auth-email" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="example@gmail.com">
+                </div>
+
+                <!-- PIN (Signup Only) -->
+                <div id="wrap-pin" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Security PIN (5 Digit)</label>
+                    <input type="number" id="auth-pin" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="12345">
+                </div>
+
+                <!-- Security Question (Signup Only) -->
+                <div id="wrap-sec-q" class="hidden space-y-3 border p-3 rounded-lg bg-gray-50">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Security Question</label>
+                        <select id="auth-sec-q" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500 text-sm">
+                            <option value="What is your mother's name?">What is your mother's name?</option>
+                            <option value="What is the name of your first school?">What is the name of your first school?</option>
+                            <option value="What is your favorite color?">What is your favorite color?</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Answer</label>
+                        <input type="text" id="auth-sec-a" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Enter your answer...">
+                    </div>
+                </div>
+
+                <!-- Password (Both) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234">
+                </div>
+
+                <!-- Confirm Password (Signup Only) -->
+                <div id="wrap-confirm-pass" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <input type="password" id="auth-confirm-password" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234">
+                </div>
+
+                <div id="auth-error" class="text-red-500 text-sm hidden font-medium text-center"></div>
+                <div id="auth-success" class="text-green-600 text-sm hidden font-medium text-center"></div>
+
+                <div class="pt-2">
+                    <button type="button" id="main-auth-btn" onclick="handleAuthAction()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">Login</button>
+                    
+                    <div class="flex justify-between items-center mt-3" id="wrap-forgot-pass">
+                        <button type="button" onclick="showScreen('forgot-pass-screen')" class="text-sm text-blue-600 font-bold hover:underline">Forgot Password?</button>
+                    </div>
+
+                    <p id="auth-toggle-text" class="text-sm text-gray-600 mt-4 text-center">
+                        Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PIN UNLOCK SCREEN -->
+    <div id="pin-screen" class="absolute inset-0 bg-blue-600 z-[100] flex flex-col items-center justify-center p-4 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">App Locked</h2>
+            <p class="text-gray-500 text-sm mb-6" id="unlock-email-display"></p>
+
+            <div class="space-y-4">
+                <input type="password" id="unlock-pin" class="w-full border-2 border-gray-300 rounded-xl p-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500" placeholder="•••••" maxlength="5">
+                <div id="pin-error" class="text-red-500 text-sm hidden font-medium"></div>
+                <button type="button" onclick="unlockApp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all active:scale-95">Unlock App</button>
+            </div>
+
+            <div class="mt-6 flex justify-between items-center text-sm">
+                <button onclick="showScreen('forgot-pin-screen')" class="text-blue-600 font-bold hover:underline">Forgot PIN?</button>
+                <button onclick="logoutUser()" class="text-red-500 font-bold hover:underline">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD SCREEN -->
+    <div id="forgot-pass-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Password Reset</h2>
+            <p class="text-sm text-gray-500 mb-4">Reset your password using security details</p>
+
+            <form class="space-y-3 text-left">
+                <div><label class="block text-xs font-medium">Email</label><input type="email" id="fp-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium">5-Digit PIN</label><input type="number" id="fp-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                
+                <div class="border p-2 rounded-lg bg-gray-50">
+                    <label class="block text-xs font-medium mb-1">Security Question</label>
+                    <select id="fp-sec-q" class="w-full border rounded p-1 text-xs mb-2 outline-none">
+                        <option value="What is your mother's name?">What is your mother's name?</option>
+                        <option value="What is the name of your first school?">What is the name of your first school?</option>
+                        <option value="What is your favorite color?">What is your favorite color?</option>
+                    </select>
+                    <label class="block text-xs font-medium">Answer</label>
+                    <input type="text" id="fp-sec-a" class="w-full border rounded p-1 text-sm outline-none">
+                </div>
+
+                <div><label class="block text-xs font-medium">New Password</label><input type="password" id="fp-new-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234"></div>
+                <div><label class="block text-xs font-medium">Confirm New Password</label><input type="password" id="fp-confirm-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234"></div>
+                
+                <div id="fp-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
+
+                <button type="button" onclick="submitForgotPass()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Reset Password</button>
+                <button type="button" onclick="showScreen('auth-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2">Back to Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORGOT PIN SCREEN -->
+    <div id="forgot-pin-screen" class="absolute inset-0 bg-gray-100 z-[100] flex flex-col items-center justify-center p-4 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">PIN Reset</h2>
+            <p class="text-sm text-gray-500 mb-4">Reset your PIN using security details</p>
+
+            <form class="space-y-3 text-left">
+                <div><label class="block text-xs font-medium">Email</label><input type="email" id="fpin-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-medium">Password</label><input type="password" id="fpin-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                
+                <div class="border p-2 rounded-lg bg-gray-50">
+                    <label class="block text-xs font-medium mb-1">Security Question</label>
+                    <select id="fpin-sec-q" class="w-full border rounded p-1 text-xs mb-2 outline-none">
+                        <option value="What is your mother's name?">What is your mother's name?</option>
+                        <option value="What is the name of your first school?">What is the name of your first school?</option>
+                        <option value="What is your favorite color?">What is your favorite color?</option>
+                    </select>
+                    <label class="block text-xs font-medium">Answer</label>
+                    <input type="text" id="fpin-sec-a" class="w-full border rounded p-1 text-sm outline-none">
+                </div>
+
+                <div><label class="block text-xs font-medium">New 5-Digit PIN</label><input type="number" id="fpin-new-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345"></div>
+                <div><label class="block text-xs font-medium">Confirm New PIN</label><input type="number" id="fpin-confirm-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345"></div>
+                
+                <div id="fpin-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
+
+                <button type="button" onclick="submitForgotPin()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Reset PIN</button>
+                <button type="button" onclick="showScreen('pin-screen')" class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-2">Back to Unlock Screen</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header" class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center hidden">
+        <h1 class="text-xl font-bold"><i class="fa-solid fa-wallet mr-2"></i> Info Holder</h1>
+        <div class="flex items-center gap-3">
+            <button onclick="loadDataFromCloud()" class="text-xl text-white hover:text-blue-200 transition-colors" title="Refresh">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button onclick="logoutUser()" class="text-xs bg-red-500 px-3 py-1 rounded hover:bg-red-600 shadow font-bold">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content List -->
+    <main class="flex-1 overflow-y-auto p-4 pb-24 hidden relative" id="item-list">
+        <!-- Ekhane sob saved info show korbe -->
+        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-gray-400">
+            <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
+            <p class="text-lg">No info available. Add new info!</p>
+        </div>
+    </main>
+
+    <!-- Floating Action Button (Add Info) -->
+    <button id="fab-btn" onclick="openModal('add-modal')" class="fab bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-blue-700 active:scale-95 transition-transform hidden">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- ADD INFO MODAL -->
+    <div id="add-modal" class="modal fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl h-[85vh] sm:h-auto overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-800">Add New Info</h2>
+                <button onclick="closeModal('add-modal')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            
+            <form id="add-form" onsubmit="saveInfo(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Title (Name)</label>
+                    <input type="text" id="info-title" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. NID Card / Brac Bank">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="info-category" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Document">📄 Document</option>
+                        <option value="Card">💳 Card Details</option>
+                        <option value="Bank">🏦 Bank Info</option>
+                        <option value="Other">📌 Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Details (Description)</label>
+                    <textarea id="info-details" rows="3" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Account no, PIN, or other details..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Google Drive Image Link (Optional)</label>
+                    <textarea id="info-image-links" rows="2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Paste link here. Use comma (,) for multiple links."></textarea>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-circle-info"></i> Ensure 'Anyone with the link' is enabled on Google Drive.</p>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 mt-4 shadow-md transition-colors">
+                    Save Info
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW DETAILS MODAL -->
+    <div id="view-modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl relative">
+            <button onclick="closeModal('view-modal')" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            <div id="view-content" class="mt-2 space-y-4 max-h-[70vh] overflow-y-auto">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN IMAGE VIEWER MODAL -->
+    <div id="image-viewer-modal" class="modal fixed inset-0 z-[60] flex items-center justify-center bg-black">
+        <button onclick="closeImageViewer()" class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center text-2xl z-[70]">&times;</button>
+        <div class="absolute top-4 left-4 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full text-xs z-[70]">
+            Double Tap to Zoom, Drag to Pan
+        </div>
+        
+        <div class="w-full h-full flex items-center justify-center overflow-hidden relative" id="zoom-container">
+            <img id="zoomable-img" src="" alt="Document View" draggable="false">
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRM MODAL -->
+    <div id="delete-modal" class="modal fixed inset-0 z-[80] flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl relative text-center">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-5xl mb-4"></i>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Warning</h2>
+            <p class="text-gray-600 text-sm mb-6">Are you sure you want to delete this? This cannot be undone.</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('delete-modal')" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                <button onclick="executeDelete()" class="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL LOADING OVERLAY -->
+    <div id="global-loader" class="fixed inset-0 bg-white bg-opacity-70 z-[110] flex flex-col items-center justify-center hidden">
+        <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-600 mb-3"></i>
+        <p class="text-gray-700 font-medium" id="loader-text">Loading...</p>
+    </div>
+
+</div>
+
+<script>
+    // 👇👇 EKHANE NOTUN DEPLOY KORA WEB APP URL TI BOSAN 👇👇
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUKb1wNqtRgOv2m_k1TlKvRLJRPhOYo9iZuYPP5uDERInxlWaOSYJkEo4-R8puzcW79w/exec"; 
+
+    // --- State Variables ---
+    let savedInfos = [];
+    let currentViewItem = null;
+    let currentImageIndex = 0;
+    let currentUser = localStorage.getItem('ih_user') || null;
+    let itemToDelete = null;
+
+    if(SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+        document.getElementById('config-warning').classList.remove('hidden');
+    }
+
+    // --- Initialize App ---
+    if(currentUser) {
+        document.getElementById('unlock-email-display').innerText = currentUser;
+        showScreen('pin-screen');
+    } else {
+        showScreen('auth-screen');
+    }
+
+    // --- Core API Function ---
+    async function callAppsScript(action, payload = {}) {
+        if(SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+            alert("Google Apps Script URL is missing!");
+            throw new Error("Missing URL");
+        }
+        
+        const requestData = { action: action, ...payload };
+        
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                redirect: 'follow', 
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(requestData)
+            });
+            const result = await response.json();
+            
+            if(!result.success) {
+                if (result.message === "Unknown error") {
+                    throw new Error("Google Apps Script is not updated! Please deploy the new version.");
+                }
+                throw new Error(result.message || "Unknown error occurred");
+            }
+            return result;
+        } catch (error) {
+            console.error("API Error:", error);
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error("Network/CORS Error: Check Script URL and ensure 'Anyone' has access.");
+            }
+            throw error;
+        }
+    }
+
+    // --- UI Controls ---
+    function showLoader(text) {
+        document.getElementById('loader-text').innerText = text;
+        document.getElementById('global-loader').classList.remove('hidden');
+    }
+    function hideLoader() {
+        document.getElementById('global-loader').classList.add('hidden');
+    }
+
+    function showScreen(screenId) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('pin-screen').classList.add('hidden');
+        document.getElementById('forgot-pass-screen').classList.add('hidden');
+        document.getElementById('forgot-pin-screen').classList.add('hidden');
+        document.getElementById('main-header').classList.add('hidden');
+        document.getElementById('item-list').classList.add('hidden');
+        document.getElementById('fab-btn').classList.add('hidden');
+
+        if(screenId === 'main') {
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('item-list').classList.remove('hidden');
+            document.getElementById('fab-btn').classList.remove('hidden');
+        } else {
+            document.getElementById(screenId).classList.remove('hidden');
+            if(screenId === 'forgot-pass-screen' && currentUser) document.getElementById('fp-email').value = currentUser;
+            if(screenId === 'forgot-pin-screen' && currentUser) document.getElementById('fpin-email').value = currentUser;
+        }
+    }
+
+    window.openModal = (id) => {
+        document.getElementById(id).classList.add('active');
+    };
+
+    window.closeModal = (id) => {
+        document.getElementById(id).classList.remove('active');
+        if(id === 'add-modal') {
+            document.getElementById('add-form').reset();
+        }
+    };
+
+    function showAuthError(msg, elementId = 'auth-error') {
+        const errDiv = document.getElementById(elementId);
+        errDiv.innerText = msg;
+        errDiv.classList.remove('hidden');
+    }
+
+    function showAuthSuccess(msg) {
+        const successDiv = document.getElementById('auth-success');
+        successDiv.innerText = msg;
+        successDiv.classList.remove('hidden');
+    }
+    function hideAuthSuccess() {
+        document.getElementById('auth-success').classList.add('hidden');
+    }
+
+    // --- Auth Functions ---
+    let isLoginMode = true;
+
+    window.toggleAuthMode = () => {
+        isLoginMode = !isLoginMode;
+        document.getElementById('auth-title').innerText = isLoginMode ? "Login" : "Create Account";
+        document.getElementById('main-auth-btn').innerText = isLoginMode ? "Login" : "Sign Up";
+        
+        // Show/Hide Fields based on mode
+        if(isLoginMode) {
+            document.getElementById('wrap-name').classList.add('hidden');
+            document.getElementById('wrap-pin').classList.add('hidden');
+            document.getElementById('wrap-sec-q').classList.add('hidden');
+            document.getElementById('wrap-confirm-pass').classList.add('hidden');
+            document.getElementById('wrap-forgot-pass').classList.remove('hidden');
+        } else {
+            document.getElementById('wrap-name').classList.remove('hidden');
+            document.getElementById('wrap-pin').classList.remove('hidden');
+            document.getElementById('wrap-sec-q').classList.remove('hidden');
+            document.getElementById('wrap-confirm-pass').classList.remove('hidden');
+            document.getElementById('wrap-forgot-pass').classList.add('hidden');
+        }
+        
+        const bottomText = isLoginMode 
+            ? `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>`
+            : `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Login</button>`;
+        document.getElementById('auth-toggle-text').innerHTML = bottomText;
+        document.getElementById('auth-error').classList.add('hidden');
+        hideAuthSuccess();
+    };
+
+    window.handleAuthAction = () => {
+        if(isLoginMode) window.loginUser();
+        else window.signupUser();
+    };
+
+    window.loginUser = async () => {
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-password').value;
+        if(!email || !pass) { showAuthError("Please enter Email and Password."); return; }
+        
+        showLoader("Logging in...");
+        try {
+            await callAppsScript('login', { username: email, password: pass });
+            currentUser = email;
+            localStorage.setItem('ih_user', email);
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            // Go to PIN unlock screen instead of main
+            document.getElementById('unlock-email-display').innerText = currentUser;
+            showScreen('pin-screen');
+            
+        } catch(error) {
+            // Ekhon theke backend theke asha exact English error message dekhabe
+            showAuthError(error.message || "Login failed!");
+        } finally { hideLoader(); }
+    };
+
+    window.signupUser = async () => {
+        const name = document.getElementById('auth-name').value.trim();
+        const email = document.getElementById('auth-email').value.trim();
+        const pin = document.getElementById('auth-pin').value.trim();
+        const secQ = document.getElementById('auth-sec-q').value;
+        const secA = document.getElementById('auth-sec-a').value.trim();
+        const pass = document.getElementById('auth-password').value;
+        const confirmPass = document.getElementById('auth-confirm-password').value;
+
+        // Validations
+        const nameRegex = /^[A-Z][a-z]+\s[A-Z][a-z]+$/;
+        if(!nameRegex.test(name)) { showAuthError("Name must be in 'First Last' format (e.g., John Doe)."); return; }
+        
+        if(!email.includes('@') || !email.includes('.')) { showAuthError("Please enter a valid email address."); return; }
+        
+        if(!/^\d{5}$/.test(pin)) { showAuthError("PIN must be exactly 5 digits."); return; }
+        
+        if(!secA) { showAuthError("Please answer the security question."); return; }
+
+        const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
+        if(!passRegex.test(pass)) { showAuthError("Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char."); return; }
+
+        if(pass !== confirmPass) { showAuthError("Passwords do not match!"); return; }
+
+        showLoader("Creating account...");
+        try {
+            await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
+            currentUser = email;
+            localStorage.setItem('ih_user', email);
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            showAuthSuccess("Signup successful!");
+            
+            setTimeout(() => {
+                hideAuthSuccess();
+                document.getElementById('unlock-email-display').innerText = currentUser;
+                showScreen('pin-screen');
+            }, 1500);
+
+        } catch(error) {
+            showAuthError(error.message);
+        } finally { hideLoader(); }
+    };
+
+    window.unlockApp = async () => {
+        const pin = document.getElementById('unlock-pin').value.trim();
+        if(!/^\d{5}$/.test(pin)) { showAuthError("Please enter a valid 5-digit PIN.", "pin-error"); return; }
+        
+        showLoader("Unlocking...");
+        try {
+            await callAppsScript('verify_pin', { username: currentUser, pin: pin });
+            document.getElementById('pin-error').classList.add('hidden');
+            document.getElementById('unlock-pin').value = '';
+            showScreen('main');
+            loadDataFromCloud();
+        } catch(error) {
+            // Ekhon theke backend er error ashbe ("Incorrect PIN.")
+            showAuthError(error.message || "Incorrect PIN.", "pin-error");
+        } finally { hideLoader(); }
+    };
+
+    window.signupUser = async () => {
+        const name = document.getElementById('auth-name').value.trim();
+        const email = document.getElementById('auth-email').value.trim();
+        const pin = document.getElementById('auth-pin').value.trim();
+        const secQ = document.getElementById('auth-sec-q').value;
+        const secA = document.getElementById('auth-sec-a').value.trim();
+        const pass = document.getElementById('auth-password').value;
+        const confirmPass = document.getElementById('auth-confirm-password').value;
+
+        // Validations
+        const nameRegex = /^[A-Z][a-z]+\s[A-Z][a-z]+$/;
+        if(!nameRegex.test(name)) { showAuthError("Name must be in 'First Last' format (e.g., John Doe)."); return; }
+        
+        if(!email.includes('@') || !email.includes('.')) { showAuthError("Please enter a valid email address."); return; }
+        
+        if(!/^\d{5}$/.test(pin)) { showAuthError("PIN must be exactly 5 digits."); return; }
+        
+        if(!secA) { showAuthError("Please answer the security question."); return; }
+
+        const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
+        if(!passRegex.test(pass)) { showAuthError("Password must be 8-15 characters, including 1 uppercase, 1 number, and 1 special char."); return; }
+
+        if(pass !== confirmPass) { showAuthError("Passwords do not match!"); return; }
+
+        showLoader("Creating account...");
+        try {
+            await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
+            currentUser = email;
+            localStorage.setItem('ih_user', email);
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            showAuthSuccess("Signup successful!");
+            
+            setTimeout(() => {
+                hideAuthSuccess();
+                document.getElementById('unlock-email-display').innerText = currentUser;
+                showScreen('pin-screen');
+            }, 1500);
+
+        } catch(error) {
+            showAuthError(error.message);
+        } finally { hideLoader(); }
+    };
+
+    window.unlockApp = async () => {
+        const pin = document.getElementById('unlock-pin').value.trim();
+        if(!/^\d{5}$/.test(pin)) { showAuthError("Please enter a valid 5-digit PIN.", "pin-error"); return; }
+        
+        showLoader("Unlocking...");
+        try {
+            await callAppsScript('verify_pin', { username: currentUser, pin: pin });
+            document.getElementById('pin-error').classList.add('hidden');
+            document.getElementById('unlock-pin').value = '';
+            showScreen('main');
+            loadDataFromCloud();
+        } catch(error) {
+            showAuthError("Incorrect PIN!", "pin-error");
+        } finally { hideLoader(); }
+    };
+
+    window.submitForgotPass = async () => {
+        const email = document.getElementById('fp-email').value.trim();
+        const pin = document.getElementById('fp-pin').value.trim();
+        const secQ = document.getElementById('fp-sec-q').value;
+        const secA = document.getElementById('fp-sec-a').value.trim();
+        const newPass = document.getElementById('fp-new-pass').value;
+        const confirmNewPass = document.getElementById('fp-confirm-pass').value;
+
+        if(!email || !pin || !secA || !newPass || !confirmNewPass) { showAuthError("Please fill in all details.", "fp-error"); return; }
+        if(newPass !== confirmNewPass) { showAuthError("Passwords do not match!", "fp-error"); return; }
+        
+        const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
+        if(!passRegex.test(newPass)) { showAuthError("New Password must be 8-15 chars, 1 uppercase, 1 number, 1 special char.", "fp-error"); return; }
+
+        showLoader("Resetting Password...");
+        try {
+            await callAppsScript('reset_password', { username: email, pin: pin, secQ: secQ, secA: secA, newPassword: newPass });
+            document.getElementById('fp-error').classList.add('hidden');
+            
+            // Clear fields
+            document.getElementById('fp-new-pass').value = '';
+            document.getElementById('fp-confirm-pass').value = '';
+            
+            alert("Password changed successfully! Please login.");
+            showScreen('auth-screen');
+        } catch(error) {
+            showAuthError(error.message, "fp-error");
+        } finally { hideLoader(); }
+    };
+
+    window.submitForgotPin = async () => {
+        const email = document.getElementById('fpin-email').value.trim();
+        const pass = document.getElementById('fpin-pass').value;
+        const secQ = document.getElementById('fpin-sec-q').value;
+        const secA = document.getElementById('fpin-sec-a').value.trim();
+        const newPin = document.getElementById('fpin-new-pin').value.trim();
+        const confirmNewPin = document.getElementById('fpin-confirm-pin').value.trim();
+
+        if(!email || !pass || !secA || !newPin || !confirmNewPin) { showAuthError("Please fill in all details.", "fpin-error"); return; }
+        if(newPin !== confirmNewPin) { showAuthError("New PINs do not match!", "fpin-error"); return; }
+        if(!/^\d{5}$/.test(newPin)) { showAuthError("New PIN must be exactly 5 digits.", "fpin-error"); return; }
+
+        showLoader("Resetting PIN...");
+        try {
+            await callAppsScript('reset_pin', { username: email, password: pass, secQ: secQ, secA: secA, newPin: newPin });
+            document.getElementById('fpin-error').classList.add('hidden');
+            
+            // Clear fields
+            document.getElementById('fpin-new-pin').value = '';
+            document.getElementById('fpin-confirm-pin').value = '';
+            
+            alert("PIN changed successfully! Please unlock the app.");
+            showScreen('pin-screen');
+        } catch(error) {
+            showAuthError(error.message, "fpin-error");
+        } finally { hideLoader(); }
+    };
+
+    window.logoutUser = () => {
+        currentUser = null;
+        localStorage.removeItem('ih_user');
+        savedInfos = [];
+        document.getElementById('unlock-pin').value = '';
+        
+        // Force fully back to Login Mode
+        isLoginMode = true;
+        document.getElementById('auth-title').innerText = "Login";
+        document.getElementById('main-auth-btn').innerText = "Login";
+        document.getElementById('wrap-name').classList.add('hidden');
+        document.getElementById('wrap-pin').classList.add('hidden');
+        document.getElementById('wrap-sec-q').classList.add('hidden');
+        document.getElementById('wrap-confirm-pass').classList.add('hidden');
+        document.getElementById('wrap-forgot-pass').classList.remove('hidden');
+        document.getElementById('auth-toggle-text').innerHTML = `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Sign Up</button>`;
+        document.getElementById('auth-error').classList.add('hidden');
+        hideAuthSuccess();
+        
+        showScreen('auth-screen');
+    };
+
+    // --- Data Processing Functions ---
+
+    // Drive link ke direct image link e convert kora
+    function processDriveLinks(inputStr) {
+        if(!inputStr) return null;
+        let links = inputStr.split(',').map(s => s.trim()).filter(s => s !== '');
+        if(links.length === 0) return null;
+
+        return links.map(url => {
+            // Check if it's a standard drive link
+            let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+            }
+            return url; // return as is if not a standard format
+        });
+    }
+
+    window.saveInfo = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+
+        const title = document.getElementById('info-title').value;
+        const category = document.getElementById('info-category').value;
+        const details = document.getElementById('info-details').value;
+        const rawLinks = document.getElementById('info-image-links').value;
+        
+        const processedLinks = processDriveLinks(rawLinks);
+        
+        const newData = {
+            id: Date.now().toString(),
+            username: currentUser,
+            title,
+            category,
+            details,
+            imageLinks: processedLinks ? JSON.stringify(processedLinks) : "",
+            timestamp: Date.now()
+        };
+
+        showLoader("Saving to Sheet...");
+        try {
+            await callAppsScript('add', newData);
+            window.closeModal('add-modal');
+            loadDataFromCloud(); // Refresh data
+        } catch (error) {
+            alert(error.message || "Failed to save!");
+        } finally { hideLoader(); }
+    };
+
+    window.loadDataFromCloud = async () => {
+        if (!currentUser) return;
+        
+        showLoader("Loading data...");
+        try {
+            const result = await callAppsScript('load', { username: currentUser });
+            savedInfos = result.data || [];
+            // Sort by latest added
+            savedInfos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderItems();
+
+            // Auto Cache (Download) images in background for offline/faster loading
+            savedInfos.forEach(item => {
+                if(item.imageLinks) {
+                    try {
+                        const links = JSON.parse(item.imageLinks);
+                        links.forEach(src => {
+                            const img = new Image();
+                            img.src = src; // Natively downloads and caches the image
+                        });
+                    } catch(e){}
+                }
+            });
+
+        } catch (error) {
+            console.error("Fetch Error:", error);
+        } finally { hideLoader(); }
+    };
+
+    window.confirmDelete = (id, event) => {
+        event.stopPropagation();
+        itemToDelete = id;
+        window.openModal('delete-modal');
+    };
+
+    window.executeDelete = async () => {
+        if(!itemToDelete || !currentUser) return;
+        
+        showLoader("Deleting...");
+        try {
+            await callAppsScript('delete', { username: currentUser, id: itemToDelete });
+            window.closeModal('delete-modal');
+            window.closeModal('view-modal');
+            itemToDelete = null;
+            loadDataFromCloud(); // Refresh list
+        } catch (error) {
+            alert("Failed to delete!");
+        } finally { hideLoader(); }
+    };
+
+    function getCategoryIcon(category) {
+        switch(category) {
+            case 'Document': return '<i class="fa-solid fa-file-lines text-blue-500"></i>';
+            case 'Card': return '<i class="fa-solid fa-credit-card text-purple-500"></i>';
+            case 'Bank': return '<i class="fa-solid fa-building-columns text-green-500"></i>';
+            default: return '<i class="fa-solid fa-paperclip text-gray-500"></i>';
+        }
+    }
+
+    function renderItems() {
+        const listContainer = document.getElementById('item-list');
+        listContainer.innerHTML = '';
+
+        if(savedInfos.length === 0) {
+            listContainer.innerHTML = `
+                <div id="empty-state" class="flex flex-col items-center justify-center h-full text-gray-400 mt-20">
+                    <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
+                    <p class="text-lg">No info available. Add new info!</p>
+                </div>`;
+            return;
+        }
+
+        savedInfos.forEach(item => {
+            const card = document.createElement('div');
+            card.className = "bg-white rounded-2xl shadow-md border border-gray-100 mb-5 cursor-pointer active:scale-[0.98] transition-transform overflow-hidden flex flex-col";
+            card.onclick = () => window.viewDetails(item.id);
+            
+            let displayImages = [];
+            if(item.imageLinks) {
+                try { displayImages = JSON.parse(item.imageLinks); } catch(e){}
+            }
+            
+            let hasImageBadge = displayImages.length > 0 ? `<span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><i class="fa-solid fa-link"></i> ${displayImages.length > 1 ? displayImages.length : ''}</span>` : '';
+
+            let topMedia = '';
+            if (displayImages.length > 0) {
+                topMedia = `<img src="${displayImages[0]}" onerror="this.outerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fa-solid fa-image-slash text-4xl\\'></i><p class=\\'text-xs mt-2\\'>Link Error or Private</p></div>'" class="w-full h-48 object-cover border-b border-gray-100 bg-gray-50">`;
+            } else {
+                topMedia = `
+                    <div class="w-full h-48 bg-gray-50 flex flex-col items-center justify-center text-6xl border-b border-gray-100 opacity-80">
+                        ${getCategoryIcon(item.category)}
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                ${topMedia}
+                <div class="p-4 flex items-center justify-between">
+                    <div class="truncate pr-4">
+                        <h3 class="font-bold text-gray-800 truncate text-xl mb-1">${item.title} ${hasImageBadge}</h3>
+                        <p class="text-sm text-gray-500">${item.category}</p>
+                    </div>
+                    <button onclick="confirmDelete('${item.id}', event)" class="text-gray-400 hover:text-red-500 p-3 bg-gray-50 hover:bg-red-50 rounded-full shrink-0 transition-colors">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    window.viewDetails = (id) => {
+        const item = savedInfos.find(i => i.id === id);
+        if(!item) return;
+
+        currentViewItem = item;
+        currentImageIndex = 0;
+
+        const content = document.getElementById('view-content');
+        
+        let displayImages = [];
+        if(item.imageLinks) {
+            try { displayImages = JSON.parse(item.imageLinks); } catch(e){}
+        }
+        
+        let imageHtml = '';
+        if(displayImages.length > 0) {
+            let flipBtn = displayImages.length > 1 ? 
+                `<button onclick="flipImage(event)" class="mt-3 w-full bg-blue-50 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200">
+                    <i class="fa-solid fa-rotate"></i> Flip Image (${currentImageIndex + 1}/${displayImages.length})
+                </button>` : '';
+
+            imageHtml = `
+                <div class="mt-4">
+                    <div class="border rounded-lg overflow-hidden relative bg-gray-100 cursor-pointer" onclick="openCurrentImageViewer()">
+                        <img id="popup-view-img" src="${displayImages[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23eee\\'/><text x=\\'50\\' y=\\'50\\' font-family=\\'Arial\\' font-size=\\'10\\' text-anchor=\\'middle\\' alignment-baseline=\\'middle\\'>Image Error</text></svg>'" class="w-full h-40 object-cover">
+                    </div>
+                    ${flipBtn}
+                </div>
+            `;
+        }
+
+        content.innerHTML = `
+            <div class="flex items-center gap-3 mb-2">
+                <div class="text-2xl">${getCategoryIcon(item.category)}</div>
+                <h2 class="text-xl font-bold text-gray-800">${item.title}</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-4 border-b pb-2">Category: ${item.category}</p>
+            
+            <div class="bg-gray-50 p-3 rounded-lg min-h-[80px] whitespace-pre-wrap text-gray-700">${item.details || 'No text details available.'}</div>
+            
+            ${imageHtml}
+        `;
+        
+        window.openModal('view-modal');
+    };
+
+    window.flipImage = (event) => {
+        if(event) event.stopPropagation();
+        if(!currentViewItem) return;
+        
+        let displayImages = [];
+        if(currentViewItem.imageLinks) {
+            try { displayImages = JSON.parse(currentViewItem.imageLinks); } catch(e){}
+        }
+        if(displayImages.length <= 1) return;
+
+        currentImageIndex = (currentImageIndex + 1) % displayImages.length;
+        
+        const imgElement = document.getElementById('popup-view-img');
+        if(imgElement) {
+            imgElement.classList.remove('flip-animation');
+            void imgElement.offsetWidth;
+            imgElement.src = displayImages[currentImageIndex];
+            imgElement.classList.add('flip-animation');
+        }
+        
+        const flipBtn = event.currentTarget;
+        if(flipBtn) {
+            flipBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Flip Image (${currentImageIndex + 1}/${displayImages.length})`;
+        }
+    };
+
+    window.openCurrentImageViewer = () => {
+        if(!currentViewItem) return;
+        let displayImages = [];
+        if(currentViewItem.imageLinks) {
+            try { displayImages = JSON.parse(currentViewItem.imageLinks); } catch(e){}
+        }
+        if(displayImages.length > 0) {
+            window.openImageViewer(displayImages[currentImageIndex]);
+        }
+    };
+
+    // --- Image Viewer Logic ---
+    const zoomImg = document.getElementById('zoomable-img');
+    let scale = 1, pointX = 0, pointY = 0, startX = 0, startY = 0;
+    let panning = false, lastTapTime = 0;
+
+    window.openImageViewer = (src) => {
+        zoomImg.src = src;
+        resetZoom();
+        window.openModal('image-viewer-modal');
+    };
+
+    window.closeImageViewer = () => {
+        window.closeModal('image-viewer-modal');
+        setTimeout(resetZoom, 300);
+    };
+
+    function resetZoom() {
+        scale = 1; pointX = 0; pointY = 0;
+        updateTransform();
+    }
+
+    function updateTransform() {
+        zoomImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+    }
+
+    zoomImg.addEventListener('touchstart', function(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTapTime;
+        if (tapLength < 300 && tapLength > 0) {
+            scale = scale === 1 ? 2.5 : 1;
+            if(scale === 1) { pointX = 0; pointY = 0; }
+            updateTransform();
+            e.preventDefault();
+        } else {
+            if (scale > 1) {
+                panning = true;
+                startX = e.touches[0].clientX - pointX;
+                startY = e.touches[0].clientY - pointY;
+            }
+        }
+        lastTapTime = currentTime;
+    }, {passive: false});
+
+    zoomImg.addEventListener('touchmove', function(e) {
+        if (!panning) return;
+        e.preventDefault();
+        pointX = e.touches[0].clientX - startX;
+        pointY = e.touches[0].clientY - startY;
+        updateTransform();
+    }, {passive: false});
+
+    zoomImg.addEventListener('touchend', () => panning = false);
+    
+    zoomImg.addEventListener('mousedown', function(e) {
+        if (scale > 1) {
+            panning = true;
+            startX = e.clientX - pointX;
+            startY = e.clientY - pointY;
+            zoomImg.style.cursor = 'grabbing';
+        }
+    });
+    
+    window.addEventListener('mousemove', function(e) {
+        if (!panning) return;
+        pointX = e.clientX - startX;
+        pointY = e.clientY - startY;
+        updateTransform();
+    });
+    
+    window.addEventListener('mouseup', function() {
+        panning = false;
+        zoomImg.style.cursor = scale > 1 ? 'grab' : 'default';
+    });
+
+    zoomImg.addEventListener('dblclick', function(e) {
+        scale = scale === 1 ? 2.5 : 1;
+        if(scale === 1) { pointX = 0; pointY = 0; }
+        zoomImg.style.cursor = scale > 1 ? 'grab' : 'default';
+        updateTransform();
+    });
+
+    // --- PWA (Add to Home Screen) & App Icon Setup ---
+    const appIcon = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23ffffff' rx='100'/%3E%3Cpath fill='%230d6efd' d='M120,80 h180 q20,0 40,20 l70,70 q20,20 20,40 v220 q0,40 -40,40 h-270 q-40,0 -40,-40 v-310 q0,-40 40,-40 z' /%3E%3Cpath fill='%230b5ed7' d='M300,80 v60 q0,20 20,20 h60 z' /%3E%3Ccircle cx='256' cy='230' r='35' fill='%23ffffff' /%3E%3Cpath d='M225,290 h62 v110 h-62 z' fill='%23ffffff' /%3E%3C/svg%3E";
+
+    const manifestJSON = {
+        "name": "Info Holder",
+        "short_name": "Info Holder",
+        "start_url": window.location.href.split('?')[0],
+        "display": "standalone",
+        "background_color": "#f3f4f6",
+        "theme_color": "#2563eb",
+        "icons": [
+            {
+                "src": appIcon,
+                "sizes": "512x512",
+                "type": "image/svg+xml",
+                "purpose": "any maskable"
+            }
+        ]
+    };
+    
+    // Inject Manifest
+    const manifestBlob = new Blob([JSON.stringify(manifestJSON)], {type: 'application/json'});
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = URL.createObjectURL(manifestBlob);
+    document.head.appendChild(manifestLink);
+    
+    // Inject Theme Color & Apple Icon
+    const metaTheme = document.createElement('meta');
+    metaTheme.name = 'theme-color';
+    metaTheme.content = '#2563eb';
+    document.head.appendChild(metaTheme);
+    
+    const appleIcon = document.createElement('link');
+    appleIcon.rel = 'apple-touch-icon';
+    appleIcon.href = appIcon;
+    document.head.appendChild(appleIcon);
+
+    // Dummy Service Worker to satisfy PWA install criteria
+    const swCode = `self.addEventListener('fetch', () => {});`;
+    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+    }
+
+</script>
+</body>
+</html>
