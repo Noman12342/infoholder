@@ -400,6 +400,29 @@
         </div>
     </div>
 
+    <!-- OTP VERIFICATION MODAL -->
+    <div id="otp-modal" class="modal fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl relative text-center">
+            <button onclick="closeModal('otp-modal')" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2" data-en="Enter OTP" data-bn="ওটিপি দিন">Enter OTP</h2>
+            <p class="text-gray-500 text-sm mb-2" data-en="A 6-digit code has been sent to your email. Valid for 5 mins." data-bn="আপনার ইমেইলে ৬-ডিজিটের একটি কোড পাঠানো হয়েছে। মেয়াদ ৫ মিনিট।">A 6-digit code has been sent to your email. Valid for 5 mins.</p>
+            
+            <div class="bg-red-50 border border-red-100 rounded-lg p-2 mb-6">
+                <p class="text-red-500 text-xs font-medium" data-en="If you don't see the email, please check your Spam/Junk folder." data-bn="যদি ইমেইল না পান, তবে অনুগ্রহ করে আপনার স্প্যাম (Spam) ফোল্ডার চেক করুন।">If you don't see the email, please check your Spam/Junk folder.</p>
+            </div>
+            
+            <div class="mb-4">
+                <input type="number" id="otp-input" class="w-full border-2 border-gray-300 rounded-xl p-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500" placeholder="------" maxlength="6">
+                <div id="otp-error" class="text-red-500 text-xs mt-2 hidden font-medium"></div>
+            </div>
+
+            <button type="button" onclick="submitOtp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all active:scale-95" data-en="Verify & Submit" data-bn="যাচাই করে সাবমিট করুন">Verify & Submit</button>
+        </div>
+    </div>
+
     <!-- GLOBAL LOADING OVERLAY -->
     <div id="global-loader" class="fixed inset-0 bg-white bg-opacity-70 z-[110] flex flex-col items-center justify-center hidden">
         <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-600 mb-3"></i>
@@ -409,7 +432,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUKb1wNqtRgOv2m_k1TlKvRLJRPhOYo9iZuYPP5uDERInxlWaOSYJkEo4-R8puzcW79w/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8i-_Lfk8NS3unQJURWergEj0HwsbOky794nR2Ov7QtS4bm_AqScVV3QsDPlLrKQCMZQ/exec"; 
 
     // --- State Variables ---
     let savedInfos = [];
@@ -418,6 +441,9 @@
     let currentUser = localStorage.getItem('ih_user') || null;
     let itemToDelete = null;
     let isLoginMode = true;
+    
+    let pendingAction = null;
+    let pendingPayload = null;
 
     // --- Visibility Toggle ---
     window.toggleVisibility = (inputId, iconElement) => {
@@ -451,6 +477,7 @@
             "Passwords do not match!": "পাসওয়ার্ড মিলেনি!",
             "Creating account...": "অ্যাকাউন্ট তৈরি হচ্ছে...",
             "Signup successful!": "সফলভাবে সাইনআপ হয়েছে!",
+            "Account created successfully! Please login.": "সফলভাবে অ্যাকাউন্ট তৈরি হয়েছে! অনুগ্রহ করে লগইন করুন।",
             "Please enter a valid 5-digit PIN.": "অনুগ্রহ করে সঠিক ৫-ডিজিটের পিন দিন।",
             "Unlocking...": "আনলক হচ্ছে...",
             "Incorrect PIN.": "পিন ভুল হয়েছে!",
@@ -476,7 +503,11 @@
             "User not found.": "ব্যবহারকারী পাওয়া যায়নি।",
             "Details do not match. Check PIN and Security Answer.": "তথ্য মিলেনি! সঠিক পিন ও নিরাপত্তা উত্তর দিন।",
             "Details do not match. Check Password and Security Answer.": "তথ্য মিলেনি! সঠিক পাসওয়ার্ড ও নিরাপত্তা উত্তর দিন।",
-            "Invalid action.": "ভুল অ্যাকশন।"
+            "Invalid action.": "ভুল অ্যাকশন।",
+            "Sending OTP...": "ওটিপি পাঠানো হচ্ছে...",
+            "Verifying...": "যাচাই করা হচ্ছে...",
+            "Please enter the 6-digit OTP.": "৬-ডিজিটের ওটিপি দিন।",
+            "Incorrect OTP or expired.": "ওটিপি ভুল অথবা মেয়াদ শেষ।"
         };
         return dict[enText] || enText;
     };
@@ -624,6 +655,12 @@
             document.getElementById('delete-pin-input').value = '';
             document.getElementById('delete-pin-error').classList.add('hidden');
         }
+        if(id === 'otp-modal') {
+            document.getElementById('otp-input').value = '';
+            document.getElementById('otp-error').classList.add('hidden');
+            pendingAction = null;
+            pendingPayload = null;
+        }
     };
 
     // --- Profile Sidebar Functions ---
@@ -761,22 +798,15 @@
 
         if(pass !== confirmPass) { showAuthError(t("Passwords do not match!")); return; }
 
-        showLoader(t("Creating account..."));
+        pendingPayload = { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA };
+        pendingAction = 'register';
+        
+        showLoader(t("Sending OTP..."));
         try {
-            await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
-            currentUser = email;
-            localStorage.setItem('ih_user', email);
-            localStorage.setItem('ih_user_name', name);
+            await callAppsScript('send_otp', { type: 'register', ...pendingPayload });
             document.getElementById('auth-error').classList.add('hidden');
-            
-            showAuthSuccess(t("Signup successful!"));
-            
-            setTimeout(() => {
-                hideAuthSuccess();
-                document.getElementById('unlock-email-display').innerText = currentUser;
-                showScreen('pin-screen');
-            }, 1500);
-
+            document.getElementById('otp-input').value = '';
+            window.openModal('otp-modal');
         } catch(error) {
             showAuthError(error.message);
         } finally { hideLoader(); }
@@ -812,16 +842,15 @@
         const passRegex = /^[A-Z](?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,14}$/;
         if(!passRegex.test(newPass)) { showAuthError(t("New Password must be 8-15 chars, 1 uppercase, 1 number, 1 special char."), "fp-error"); return; }
 
-        showLoader(t("Resetting Password..."));
+        pendingPayload = { username: email, pin: pin, secQ: secQ, secA: secA, newPassword: newPass };
+        pendingAction = 'reset_password';
+        
+        showLoader(t("Sending OTP..."));
         try {
-            await callAppsScript('reset_password', { username: email, pin: pin, secQ: secQ, secA: secA, newPassword: newPass });
+            await callAppsScript('send_otp', { type: 'reset_password', ...pendingPayload });
             document.getElementById('fp-error').classList.add('hidden');
-            
-            document.getElementById('fp-new-pass').value = '';
-            document.getElementById('fp-confirm-pass').value = '';
-            
-            alert(t("Password changed successfully! Please login."));
-            showScreen('auth-screen');
+            document.getElementById('otp-input').value = '';
+            window.openModal('otp-modal');
         } catch(error) {
             showAuthError(error.message, "fp-error");
         } finally { hideLoader(); }
@@ -839,19 +868,92 @@
         if(newPin !== confirmNewPin) { showAuthError(t("New PINs do not match!"), "fpin-error"); return; }
         if(!/^\d{5}$/.test(newPin)) { showAuthError(t("New PIN must be exactly 5 digits."), "fpin-error"); return; }
 
-        showLoader(t("Resetting PIN..."));
+        pendingPayload = { username: email, password: pass, secQ: secQ, secA: secA, newPin: newPin };
+        pendingAction = 'reset_pin';
+        
+        showLoader(t("Sending OTP..."));
         try {
-            await callAppsScript('reset_pin', { username: email, password: pass, secQ: secQ, secA: secA, newPin: newPin });
+            await callAppsScript('send_otp', { type: 'reset_pin', ...pendingPayload });
             document.getElementById('fpin-error').classList.add('hidden');
-            
-            document.getElementById('fpin-new-pin').value = '';
-            document.getElementById('fpin-confirm-pin').value = '';
-            
-            alert(t("PIN changed successfully! Please unlock the app."));
-            showScreen('pin-screen');
+            document.getElementById('otp-input').value = '';
+            window.openModal('otp-modal');
         } catch(error) {
             showAuthError(error.message, "fpin-error");
         } finally { hideLoader(); }
+    };
+
+    window.submitOtp = async () => {
+        const otp = document.getElementById('otp-input').value.trim();
+        const errDiv = document.getElementById('otp-error');
+        if(!/^\d{6}$/.test(otp)) {
+            errDiv.innerText = t("Please enter the 6-digit OTP.");
+            errDiv.classList.remove('hidden');
+            return;
+        }
+        
+        showLoader(t("Verifying..."));
+        try {
+            const finalPayload = { ...pendingPayload, otp: otp };
+            await callAppsScript(pendingAction, finalPayload);
+            
+            window.closeModal('otp-modal');
+            errDiv.classList.add('hidden');
+            
+            if (pendingAction === 'register') {
+                // Return to login mode
+                isLoginMode = true;
+                document.getElementById('wrap-name').classList.add('hidden');
+                document.getElementById('wrap-pin').classList.add('hidden');
+                document.getElementById('wrap-sec-q').classList.add('hidden');
+                document.getElementById('wrap-confirm-pass').classList.add('hidden');
+                document.getElementById('wrap-forgot-pass').classList.remove('hidden');
+                updateDynamicTexts();
+                
+                showScreen('auth-screen');
+                showAuthSuccess(t("Account created successfully! Please login."));
+                setTimeout(() => hideAuthSuccess(), 3000);
+            } else if (pendingAction === 'reset_password') {
+                document.getElementById('fp-new-pass').value = '';
+                document.getElementById('fp-confirm-pass').value = '';
+                
+                // Return to login mode
+                isLoginMode = true;
+                document.getElementById('wrap-name').classList.add('hidden');
+                document.getElementById('wrap-pin').classList.add('hidden');
+                document.getElementById('wrap-sec-q').classList.add('hidden');
+                document.getElementById('wrap-confirm-pass').classList.add('hidden');
+                document.getElementById('wrap-forgot-pass').classList.remove('hidden');
+                updateDynamicTexts();
+
+                showScreen('auth-screen');
+                showAuthSuccess(t("Password changed successfully! Please login."));
+                setTimeout(() => hideAuthSuccess(), 3000);
+            } else if (pendingAction === 'reset_pin') {
+                document.getElementById('fpin-new-pin').value = '';
+                document.getElementById('fpin-confirm-pin').value = '';
+                
+                showScreen('pin-screen');
+                let pinErr = document.getElementById('pin-error');
+                pinErr.classList.remove('text-red-500');
+                pinErr.classList.add('text-green-600');
+                pinErr.innerText = t("PIN changed successfully! Please unlock the app.");
+                pinErr.classList.remove('hidden');
+                setTimeout(() => {
+                    pinErr.classList.add('hidden');
+                    pinErr.classList.remove('text-green-600');
+                    pinErr.classList.add('text-red-500');
+                }, 4000);
+            }
+            
+            pendingAction = null;
+            pendingPayload = null;
+            
+        } catch (error) {
+            errDiv.innerText = error.message || t("Incorrect OTP or expired.");
+            errDiv.classList.remove('hidden');
+        } finally {
+            hideLoader();
+        }
     };
 
     window.logoutUser = () => {
