@@ -217,8 +217,8 @@
             <button onclick="loadDataFromCloud()" class="text-xl text-white hover:text-blue-200 transition-colors" title="Refresh">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
-            <button onclick="logoutUser()" class="text-xs bg-red-500 px-3 py-1 rounded hover:bg-red-600 shadow font-bold" data-en="Logout" data-bn="লগআউট">
-                Logout
+            <button onclick="openProfileSidebar()" class="text-2xl text-white hover:text-blue-200 transition-colors shadow-sm rounded-full outline-none">
+                <i class="fa-solid fa-circle-user"></i>
             </button>
         </div>
     </header>
@@ -315,6 +315,37 @@
                 <button onclick="closeModal('delete-modal')" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300" data-en="Cancel" data-bn="বাতিল">Cancel</button>
                 <button onclick="executeDelete()" class="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700" data-en="Yes, Delete" data-bn="হ্যাঁ, মুছে ফেলুন">Yes, Delete</button>
             </div>
+        </div>
+    </div>
+
+    <!-- PROFILE SIDEBAR OVERLAY -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[120] hidden transition-opacity duration-300 opacity-0" onclick="closeProfileSidebar()"></div>
+    
+    <!-- PROFILE SIDEBAR -->
+    <div id="profile-sidebar" class="fixed top-0 right-0 h-full w-64 sm:w-72 bg-white z-[130] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div class="bg-blue-600 text-white p-6 flex flex-col items-center justify-center relative">
+            <button onclick="closeProfileSidebar()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-3xl leading-none outline-none">&times;</button>
+            <i class="fa-solid fa-circle-user text-6xl mb-3 mt-4"></i>
+            <h3 id="sidebar-name" class="font-bold text-lg truncate w-full text-center" data-en="User Profile" data-bn="ইউজার প্রোফাইল">User Profile</h3>
+            <p id="sidebar-email" class="text-sm opacity-90 truncate w-full text-center mt-1"></p>
+        </div>
+        
+        <div class="p-4 flex-1 space-y-2 overflow-y-auto mt-2">
+            <button onclick="goToForgotPass()" class="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-blue-50 rounded-xl transition-colors font-medium">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-key"></i></div>
+                <span data-en="Forgot Password?" data-bn="পাসওয়ার্ড ভুলে গেছেন?">Forgot Password?</span>
+            </button>
+            <button onclick="goToForgotPin()" class="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-blue-50 rounded-xl transition-colors font-medium">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-th"></i></div>
+                <span data-en="Forgot PIN?" data-bn="পিন ভুলে গেছেন?">Forgot PIN?</span>
+            </button>
+        </div>
+        
+        <div class="p-4 border-t border-gray-100 mb-4">
+            <button onclick="sidebarLogout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold p-3 rounded-xl hover:bg-red-100 transition-colors">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span data-en="Logout" data-bn="লগআউট">Logout</span>
+            </button>
         </div>
     </div>
 
@@ -530,6 +561,54 @@
         }
     };
 
+    // --- Profile Sidebar Functions ---
+    window.openProfileSidebar = () => {
+        document.getElementById('sidebar-email').innerText = currentUser || '';
+        const savedName = localStorage.getItem('ih_user_name');
+        const nameEl = document.getElementById('sidebar-name');
+        if (savedName) {
+            nameEl.innerText = savedName;
+        } else {
+            nameEl.innerText = currentLang === 'en' ? "User Profile" : "ইউজার প্রোফাইল";
+        }
+        
+        const overlay = document.getElementById('sidebar-overlay');
+        const sidebar = document.getElementById('profile-sidebar');
+        
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.remove('opacity-0');
+            sidebar.classList.remove('translate-x-full');
+        }, 10);
+    };
+
+    window.closeProfileSidebar = () => {
+        const overlay = document.getElementById('sidebar-overlay');
+        const sidebar = document.getElementById('profile-sidebar');
+        
+        overlay.classList.add('opacity-0');
+        sidebar.classList.add('translate-x-full');
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    };
+
+    window.goToForgotPass = () => {
+        window.closeProfileSidebar();
+        showScreen('forgot-pass-screen');
+    };
+
+    window.goToForgotPin = () => {
+        window.closeProfileSidebar();
+        showScreen('forgot-pin-screen');
+    };
+
+    window.sidebarLogout = () => {
+        window.closeProfileSidebar();
+        window.logoutUser();
+    };
+
     function showAuthError(msg, elementId = 'auth-error') {
         const errDiv = document.getElementById(elementId);
         errDiv.innerText = msg;
@@ -622,6 +701,7 @@
             await callAppsScript('register', { username: email, password: pass, name: name, pin: pin, secQ: secQ, secA: secA });
             currentUser = email;
             localStorage.setItem('ih_user', email);
+            localStorage.setItem('ih_user_name', name);
             document.getElementById('auth-error').classList.add('hidden');
             
             showAuthSuccess(t("Signup successful!"));
@@ -861,43 +941,115 @@
 
         let errorText = currentLang === 'en' ? "Link Error or Private" : "লিংক এরর বা প্রাইভেট";
 
+        // Group items by category
+        const groupedInfos = {};
         savedInfos.forEach(item => {
-            const card = document.createElement('div');
-            card.className = "bg-white rounded-2xl shadow-md border border-gray-100 mb-5 cursor-pointer active:scale-[0.98] transition-transform overflow-hidden flex flex-col";
-            card.onclick = () => window.viewDetails(item.id);
-            
-            let displayImages = [];
-            if(item.imageLinks) {
-                try { displayImages = JSON.parse(item.imageLinks); } catch(e){}
-            }
-            
-            let hasImageBadge = displayImages.length > 0 ? `<span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><i class="fa-solid fa-link"></i> ${displayImages.length > 1 ? displayImages.length : ''}</span>` : '';
+            let cat = item.category || 'Other';
+            if(!groupedInfos[cat]) groupedInfos[cat] = [];
+            groupedInfos[cat].push(item);
+        });
 
-            let topMedia = '';
-            if (displayImages.length > 0) {
-                topMedia = `<img src="${displayImages[0]}" onerror="this.outerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fa-solid fa-image-slash text-4xl\\'></i><p class=\\'text-xs mt-2\\'>${errorText}</p></div>'" class="w-full h-48 object-cover border-b border-gray-100 bg-gray-50">`;
-            } else {
-                topMedia = `
-                    <div class="w-full h-48 bg-gray-50 flex flex-col items-center justify-center text-6xl border-b border-gray-100 opacity-80">
-                        ${getCategoryIcon(item.category)}
+        const catTranslations = {
+            'Documents': { en: 'Documents', bn: 'ডকুমেন্টস' },
+            'Document': { en: 'Documents', bn: 'ডকুমেন্টস' },
+            'Card': { en: 'Card Details', bn: 'কার্ডের বিবরণ' },
+            'Bank': { en: 'Bank Info', bn: 'ব্যাংক তথ্য' },
+            'Bike/Car': { en: 'Bike/Car', bn: 'বাইক/গাড়ি' },
+            'Other': { en: 'Other', bn: 'অন্যান্য' }
+        };
+
+        // Category gulo nirdishto serial e sajate ei code tuku add kora hoyeche
+        const predefinedOrder = ['Documents', 'Document', 'Card', 'Bank', 'Bike/Car', 'Other'];
+        const sortedCategories = Object.keys(groupedInfos).sort((a, b) => {
+            let indexA = predefinedOrder.indexOf(a);
+            let indexB = predefinedOrder.indexOf(b);
+            if (indexA === -1) indexA = 999;
+            if (indexB === -1) indexB = 999;
+            return indexA - indexB;
+        });
+
+        for(const category of sortedCategories) {
+            const items = groupedInfos[category];
+            const safeId = category.replace(/[^a-zA-Z0-9]/g, '');
+
+            // Create Category Header Button
+            const catHeader = document.createElement('button');
+            catHeader.className = "w-full bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-transform";
+            
+            let tEn = catTranslations[category] ? catTranslations[category].en : category;
+            let tBn = catTranslations[category] ? catTranslations[category].bn : category;
+            let displayName = currentLang === 'en' ? tEn : tBn;
+
+            catHeader.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl w-8 text-center">${getCategoryIcon(category)}</div>
+                    <h2 class="text-lg font-bold text-gray-800" data-en="${tEn}" data-bn="${tBn}">${displayName}</h2>
+                    <span class="bg-blue-100 text-blue-700 text-xs py-1 px-3 rounded-full font-bold">${items.length}</span>
+                </div>
+                <i id="cat-icon-${safeId}" class="fa-solid fa-chevron-up text-gray-400 transition-transform duration-300" style="transform: rotate(180deg);"></i>
+            `;
+
+            // Create Container for items inside this category
+            const catContainer = document.createElement('div');
+            catContainer.id = `cat-container-${safeId}`;
+            // Removed blue line classes and added 'hidden' so it starts closed
+            catContainer.className = "hidden mb-6 space-y-4 transition-all duration-300";
+
+            // Toggle Show/Hide logic
+            catHeader.onclick = () => {
+                const icon = document.getElementById(`cat-icon-${safeId}`);
+                if (catContainer.classList.contains('hidden')) {
+                    catContainer.classList.remove('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    catContainer.classList.add('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            };
+
+            listContainer.appendChild(catHeader);
+
+            // Add items to this category's container
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-md border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform overflow-hidden flex flex-col";
+                card.onclick = () => window.viewDetails(item.id);
+                
+                let displayImages = [];
+                if(item.imageLinks) {
+                    try { displayImages = JSON.parse(item.imageLinks); } catch(e){}
+                }
+                
+                let hasImageBadge = displayImages.length > 0 ? `<span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><i class="fa-solid fa-link"></i> ${displayImages.length > 1 ? displayImages.length : ''}</span>` : '';
+
+                let topMedia = '';
+                if (displayImages.length > 0) {
+                    topMedia = `<img src="${displayImages[0]}" onerror="this.outerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fa-solid fa-image-slash text-4xl\\'></i><p class=\\'text-xs mt-2\\'>${errorText}</p></div>'" class="w-full h-48 object-cover border-b border-gray-100 bg-gray-50">`;
+                } else {
+                    topMedia = `
+                        <div class="w-full h-48 bg-gray-50 flex flex-col items-center justify-center text-6xl border-b border-gray-100 opacity-80">
+                            ${getCategoryIcon(item.category)}
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${topMedia}
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="truncate pr-4">
+                            <h3 class="font-bold text-gray-800 truncate text-xl mb-1">${item.title} ${hasImageBadge}</h3>
+                            <p class="text-sm text-gray-500">${item.category}</p>
+                        </div>
+                        <button onclick="confirmDelete('${item.id}', event)" class="text-gray-400 hover:text-red-500 p-3 bg-gray-50 hover:bg-red-50 rounded-full shrink-0 transition-colors">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 `;
-            }
-
-            card.innerHTML = `
-                ${topMedia}
-                <div class="p-4 flex items-center justify-between">
-                    <div class="truncate pr-4">
-                        <h3 class="font-bold text-gray-800 truncate text-xl mb-1">${item.title} ${hasImageBadge}</h3>
-                        <p class="text-sm text-gray-500">${item.category}</p>
-                    </div>
-                    <button onclick="confirmDelete('${item.id}', event)" class="text-gray-400 hover:text-red-500 p-3 bg-gray-50 hover:bg-red-50 rounded-full shrink-0 transition-colors">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            listContainer.appendChild(card);
-        });
+                catContainer.appendChild(card);
+            });
+            
+            listContainer.appendChild(catContainer);
+        }
     }
 
     window.viewDetails = (id) => {
