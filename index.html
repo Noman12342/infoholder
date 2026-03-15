@@ -1135,7 +1135,7 @@
         if(displayImages.length > 0) {
             let flipText = currentLang === 'en' ? "Flip Image" : "ছবি উল্টান";
             let flipBtn = displayImages.length > 1 ? 
-                `<button onclick="flipImage(event)" class="mt-3 w-full bg-blue-50 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200">
+                `<button id="flip-btn-dynamic" onclick="flipImage(event)" class="mt-3 w-full bg-blue-50 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200">
                     <i class="fa-solid fa-rotate"></i> ${flipText} (${currentImageIndex + 1}/${displayImages.length})
                 </button>` : '';
 
@@ -1211,6 +1211,7 @@
     let scale = 1, pointX = 0, pointY = 0, startX = 0, startY = 0;
     let panning = false, lastTapTime = 0;
     let initialDistance = 0, initialScale = 1;
+    let swipeStartX = 0, swipeStartY = 0, swipeEndX = 0, swipeEndY = 0;
 
     window.openImageViewer = (src) => {
         zoomImg.src = src;
@@ -1232,6 +1233,47 @@
         zoomImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
     }
 
+    function checkSwipe() {
+        if (scale !== 1 || !currentViewItem) return;
+        
+        let displayImages = [];
+        if(currentViewItem.imageLinks) {
+            try { displayImages = JSON.parse(currentViewItem.imageLinks); } catch(e){}
+        }
+        if (displayImages.length <= 1) return;
+
+        const diffX = swipeStartX - swipeEndX;
+        const diffY = swipeStartY - swipeEndY;
+
+        // Slide/Swipe distance check
+        if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0) {
+                // Swiped Left -> Go to Next Image
+                currentImageIndex = (currentImageIndex + 1) % displayImages.length;
+            } else {
+                // Swiped Right -> Go to Previous Image
+                currentImageIndex = (currentImageIndex - 1 + displayImages.length) % displayImages.length;
+            }
+
+            // Update Fullscreen Image
+            zoomImg.classList.remove('flip-animation');
+            void zoomImg.offsetWidth; // Trigger reflow
+            zoomImg.src = displayImages[currentImageIndex];
+            zoomImg.classList.add('flip-animation');
+
+            // Sync background modal image
+            const popupImg = document.getElementById('popup-view-img');
+            if(popupImg) popupImg.src = displayImages[currentImageIndex];
+            
+            // Sync Flip Button text
+            const flipBtn = document.getElementById('flip-btn-dynamic');
+            if(flipBtn) {
+                let flipText = currentLang === 'en' ? "Flip Image" : "ছবি উল্টান";
+                flipBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> ${flipText} (${currentImageIndex + 1}/${displayImages.length})`;
+            }
+        }
+    }
+
     zoomImg.addEventListener('touchstart', function(e) {
         if (e.touches.length === 2) {
             // 2 Angul diye Zoom (Pinch)
@@ -1242,6 +1284,9 @@
             initialScale = scale;
             panning = false;
         } else if (e.touches.length === 1) {
+            swipeStartX = e.touches[0].clientX;
+            swipeStartY = e.touches[0].clientY;
+            
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTapTime;
             if (tapLength < 300 && tapLength > 0) {
@@ -1276,9 +1321,18 @@
         }
     }, {passive: false});
 
-    zoomImg.addEventListener('touchend', () => panning = false);
+    zoomImg.addEventListener('touchend', (e) => {
+        panning = false;
+        if (e.changedTouches && e.changedTouches.length === 1) {
+            swipeEndX = e.changedTouches[0].clientX;
+            swipeEndY = e.changedTouches[0].clientY;
+            checkSwipe();
+        }
+    });
     
     zoomImg.addEventListener('mousedown', function(e) {
+        swipeStartX = e.clientX;
+        swipeStartY = e.clientY;
         if (scale > 1) {
             panning = true;
             startX = e.clientX - pointX;
@@ -1294,9 +1348,15 @@
         updateTransform();
     });
     
-    window.addEventListener('mouseup', function() {
+    window.addEventListener('mouseup', function(e) {
         panning = false;
         zoomImg.style.cursor = scale > 1 ? 'grab' : 'default';
+        
+        if(document.getElementById('image-viewer-modal').classList.contains('active')) {
+            swipeEndX = e.clientX;
+            swipeEndY = e.clientY;
+            checkSwipe();
+        }
     });
 
     zoomImg.addEventListener('dblclick', function(e) {
