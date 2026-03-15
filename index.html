@@ -70,7 +70,10 @@
                 <!-- PIN (Signup Only) -->
                 <div id="wrap-pin" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Security PIN (5 Digit)" data-bn="সিকিউরিটি পিন (৫ ডিজিট)">Security PIN (5 Digit)</label>
-                    <input type="number" id="auth-pin" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345">
+                    <div class="relative">
+                        <input type="password" inputmode="numeric" maxlength="5" id="auth-pin" class="w-full border border-gray-300 rounded-lg p-2 pr-10 outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345">
+                        <button type="button" onclick="toggleVisibility('auth-pin', this.children[0])" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </div>
 
                 <!-- Security Question (Signup Only) -->
@@ -92,13 +95,19 @@
                 <!-- Password (Both) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Password" data-bn="পাসওয়ার্ড">Password</label>
-                    <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                    <div class="relative">
+                        <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-2 pr-10 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                        <button type="button" onclick="toggleVisibility('auth-password', this.children[0])" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </div>
 
                 <!-- Confirm Password (Signup Only) -->
                 <div id="wrap-confirm-pass" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Confirm Password" data-bn="পাসওয়ার্ড নিশ্চিত করুন">Confirm Password</label>
-                    <input type="password" id="auth-confirm-password" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                    <div class="relative">
+                        <input type="password" id="auth-confirm-password" class="w-full border border-gray-300 rounded-lg p-2 pr-10 outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                        <button type="button" onclick="toggleVisibility('auth-confirm-password', this.children[0])" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </div>
 
                 <div id="auth-error" class="text-red-500 text-sm hidden font-medium text-center"></div>
@@ -129,7 +138,10 @@
             <p class="text-gray-500 text-sm mb-6" id="unlock-email-display"></p>
 
             <div class="space-y-4">
-                <input type="password" id="unlock-pin" class="w-full border-2 border-gray-300 rounded-xl p-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500" placeholder="•••••" maxlength="5">
+                <div class="relative">
+                    <input type="password" inputmode="numeric" id="unlock-pin" class="w-full border-2 border-gray-300 rounded-xl p-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500 pr-12" placeholder="•••••" maxlength="5">
+                    <button type="button" onclick="toggleVisibility('unlock-pin', this.children[0])" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-blue-600 text-lg outline-none"><i class="fa-solid fa-eye"></i></button>
+                </div>
                 <div id="pin-error" class="text-red-500 text-sm hidden font-medium"></div>
                 <button type="button" onclick="unlockApp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all active:scale-95" data-en="Unlock App" data-bn="অ্যাপ আনলক করুন">Unlock App</button>
             </div>
@@ -151,7 +163,13 @@
 
             <form class="space-y-3 text-left">
                 <div><label class="block text-xs font-medium" data-en="Email" data-bn="ইমেইল">Email</label><input type="email" id="fp-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
-                <div><label class="block text-xs font-medium" data-en="5-Digit PIN" data-bn="৫-ডিজিট পিন">5-Digit PIN</label><input type="number" id="fp-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="5-Digit PIN" data-bn="৫-ডিজিট পিন">5-Digit PIN</label>
+                    <div class="relative">
+                        <input type="password" inputmode="numeric" maxlength="5" id="fp-pin" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500">
+                        <button type="button" onclick="toggleVisibility('fp-pin', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
                 
                 <div class="border p-2 rounded-lg bg-gray-50">
                     <label class="block text-xs font-medium mb-1" data-en="Security Question" data-bn="নিরাপত্তা প্রশ্ন">Security Question</label>
@@ -164,8 +182,20 @@
                     <input type="text" id="fp-sec-a" class="w-full border rounded p-1 text-sm outline-none">
                 </div>
 
-                <div><label class="block text-xs font-medium" data-en="New Password" data-bn="নতুন পাসওয়ার্ড">New Password</label><input type="password" id="fp-new-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234"></div>
-                <div><label class="block text-xs font-medium" data-en="Confirm New Password" data-bn="নতুন পাসওয়ার্ড নিশ্চিত করুন">Confirm New Password</label><input type="password" id="fp-confirm-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234"></div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="New Password" data-bn="নতুন পাসওয়ার্ড">New Password</label>
+                    <div class="relative">
+                        <input type="password" id="fp-new-pass" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                        <button type="button" onclick="toggleVisibility('fp-new-pass', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="Confirm New Password" data-bn="নতুন পাসওয়ার্ড নিশ্চিত করুন">Confirm New Password</label>
+                    <div class="relative">
+                        <input type="password" id="fp-confirm-pass" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500" placeholder="Abc@1234" data-en="Abc@1234" data-bn="Abc@1234">
+                        <button type="button" onclick="toggleVisibility('fp-confirm-pass', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
                 
                 <div id="fp-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
 
@@ -185,7 +215,13 @@
 
             <form class="space-y-3 text-left">
                 <div><label class="block text-xs font-medium" data-en="Email" data-bn="ইমেইল">Email</label><input type="email" id="fpin-email" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
-                <div><label class="block text-xs font-medium" data-en="Password" data-bn="পাসওয়ার্ড">Password</label><input type="password" id="fpin-pass" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="Password" data-bn="পাসওয়ার্ড">Password</label>
+                    <div class="relative">
+                        <input type="password" id="fpin-pass" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500">
+                        <button type="button" onclick="toggleVisibility('fpin-pass', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
                 
                 <div class="border p-2 rounded-lg bg-gray-50">
                     <label class="block text-xs font-medium mb-1" data-en="Security Question" data-bn="নিরাপত্তা প্রশ্ন">Security Question</label>
@@ -198,8 +234,20 @@
                     <input type="text" id="fpin-sec-a" class="w-full border rounded p-1 text-sm outline-none">
                 </div>
 
-                <div><label class="block text-xs font-medium" data-en="New 5-Digit PIN" data-bn="নতুন ৫-ডিজিট পিন">New 5-Digit PIN</label><input type="number" id="fpin-new-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345"></div>
-                <div><label class="block text-xs font-medium" data-en="Confirm New PIN" data-bn="নতুন পিন নিশ্চিত করুন">Confirm New PIN</label><input type="number" id="fpin-confirm-pin" class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345"></div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="New 5-Digit PIN" data-bn="নতুন ৫-ডিজিট পিন">New 5-Digit PIN</label>
+                    <div class="relative">
+                        <input type="password" inputmode="numeric" maxlength="5" id="fpin-new-pin" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345">
+                        <button type="button" onclick="toggleVisibility('fpin-new-pin', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium" data-en="Confirm New PIN" data-bn="নতুন পিন নিশ্চিত করুন">Confirm New PIN</label>
+                    <div class="relative">
+                        <input type="password" inputmode="numeric" maxlength="5" id="fpin-confirm-pin" class="w-full border rounded-lg p-2 pr-8 text-sm outline-none focus:border-blue-500" placeholder="12345" data-en="12345" data-bn="12345">
+                        <button type="button" onclick="toggleVisibility('fpin-confirm-pin', this.children[0])" class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-500 hover:text-blue-600 outline-none"><i class="fa-solid fa-eye text-xs"></i></button>
+                    </div>
+                </div>
                 
                 <div id="fpin-error" class="text-red-500 text-xs hidden font-medium text-center"></div>
 
@@ -307,7 +355,10 @@
             <p class="text-gray-600 text-sm mb-4" data-en="Are you sure you want to delete this? This cannot be undone." data-bn="আপনি কি নিশ্চিত এটি মুছে ফেলতে চান? এটি আর ফিরে পাওয়া যাবে না।">Are you sure you want to delete this? This cannot be undone.</p>
             
             <div class="mb-6">
-                <input type="password" id="delete-pin-input" class="w-full border-2 border-gray-300 rounded-xl p-2 text-center text-xl tracking-[0.5em] outline-none focus:border-red-500" placeholder="•••••" maxlength="5">
+                <div class="relative">
+                    <input type="password" inputmode="numeric" id="delete-pin-input" class="w-full border-2 border-gray-300 rounded-xl p-2 text-center text-xl tracking-[0.5em] outline-none focus:border-red-500 pr-10" placeholder="•••••" maxlength="5">
+                    <button type="button" onclick="toggleVisibility('delete-pin-input', this.children[0])" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-red-600 text-lg outline-none"><i class="fa-solid fa-eye"></i></button>
+                </div>
                 <div id="delete-pin-error" class="text-red-500 text-xs mt-2 hidden font-medium"></div>
             </div>
 
@@ -367,6 +418,20 @@
     let currentUser = localStorage.getItem('ih_user') || null;
     let itemToDelete = null;
     let isLoginMode = true;
+
+    // --- Visibility Toggle ---
+    window.toggleVisibility = (inputId, iconElement) => {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            iconElement.classList.remove("fa-eye");
+            iconElement.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            iconElement.classList.remove("fa-eye-slash");
+            iconElement.classList.add("fa-eye");
+        }
+    };
 
     // --- Language Management ---
     let currentLang = localStorage.getItem('ih_lang') || 'en';
