@@ -1088,6 +1088,15 @@
                     try {
                         const links = JSON.parse(item.imageLinks);
                         links.forEach(src => {
+                            // Aggressively download and cache images for offline view
+                            if ('caches' in window && navigator.onLine) {
+                                fetch(src, {mode: 'no-cors'}).then(response => {
+                                    caches.open('info-holder-cache-v3').then(cache => {
+                                        cache.put(src, response);
+                                    });
+                                }).catch(()=>{});
+                            }
+                            
                             const img = new Image();
                             img.src = src; 
                         });
@@ -1570,7 +1579,7 @@
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').catch(()=>{});
+            navigator.serviceWorker.register('/sw.js?v=3').catch(()=>{});
         });
     }
 
