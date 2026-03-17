@@ -1568,39 +1568,10 @@
     appleIcon.href = appIcon;
     document.head.appendChild(appleIcon);
 
-    const swCode = `
-    const CACHE_NAME = 'ih-image-cache-v1';
-    self.addEventListener('install', (e) => self.skipWaiting());
-    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
-    self.addEventListener('fetch', (event) => {
-        if (event.request.destination === 'image' || event.request.url.includes('drive.google.com')) {
-            event.respondWith(
-                caches.match(event.request).then((cachedResponse) => {
-                    if (cachedResponse) {
-                        fetch(event.request).then(response => {
-                            if(response && (response.status === 200 || response.status === 0)) {
-                                caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
-                            }
-                        }).catch(()=>{});
-                        return cachedResponse;
-                    }
-                    return fetch(event.request).then((response) => {
-                        if (response && (response.status === 200 || response.status === 0)) {
-                            const responseToCache = response.clone();
-                            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-                        }
-                        return response;
-                    }).catch(() => {
-                        return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23eee"/><text x="50" y="50" font-family="Arial" font-size="12" text-anchor="middle" alignment-baseline="middle">Offline</text></svg>', { headers: { 'Content-Type': 'image/svg+xml' } });
-                    });
-                })
-            );
-        }
-    });
-    `;
-    const swBlob = new Blob([swCode], {type: 'application/javascript'});
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(()=>{});
+        });
     }
 
     // --- Network Status Logic ---
