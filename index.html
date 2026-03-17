@@ -261,6 +261,7 @@
     <header id="main-header" class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center hidden">
         <h1 class="text-xl font-bold"><i class="fa-solid fa-wallet mr-2"></i> Info Holder</h1>
         <div class="flex items-center gap-3">
+            <i id="network-icon" class="fa-solid fa-wifi text-green-300 text-sm transition-colors duration-300" title="Online"></i>
             <button onclick="toggleLanguage()" class="lang-toggle-btn text-xs bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-50 shadow font-bold"></button>
             <button onclick="loadDataFromCloud()" class="text-xl text-white hover:text-blue-200 transition-colors" title="Refresh">
                 <i class="fa-solid fa-rotate-right"></i>
@@ -352,7 +353,7 @@
         <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl relative text-center">
             <i class="fa-solid fa-triangle-exclamation text-red-500 text-5xl mb-4"></i>
             <h2 class="text-xl font-bold text-gray-800 mb-2" data-en="Warning" data-bn="সতর্কতা">Warning</h2>
-            <p class="text-gray-600 text-sm mb-4" data-en="Are you sure you want to delete this? This cannot be undone." data-bn="আপনি কি নিশ্চিত এটি মুছে ফেলতে চান? এটি আর ফিরে পাওয়া যাবে না।">Are you sure you want to delete this? This cannot be undone.</p>
+            <p class="text-gray-600 text-sm mb-4" data-en="Are you sure you want to delete this? This cannot be undone." data-bn="আপনি কি নিশ্চিত এটি মুছে ফেলতে চান? এটি আর ফিরে পাওয়া যাবে অ্যাকাউন্টে।">Are you sure you want to delete this? This cannot be undone.</p>
             
             <div class="mb-6">
                 <div class="relative">
@@ -423,6 +424,18 @@
         </div>
     </div>
 
+    <!-- SUCCESS MODAL -->
+    <div id="success-modal" class="modal fixed inset-0 z-[120] flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl relative text-center">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2" data-en="Success!" data-bn="সফল!">Success!</h2>
+            <p id="success-message" class="text-gray-600 text-sm mb-6"></p>
+            <button type="button" onclick="closeSuccessModal()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 shadow-md transition-all active:scale-95" data-en="OK" data-bn="ঠিক আছে">OK</button>
+        </div>
+    </div>
+
     <!-- GLOBAL LOADING OVERLAY -->
     <div id="global-loader" class="fixed inset-0 bg-white bg-opacity-70 z-[110] flex flex-col items-center justify-center hidden">
         <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-600 mb-3"></i>
@@ -444,6 +457,7 @@
     
     let pendingAction = null;
     let pendingPayload = null;
+    let lastCompletedAction = null;
 
     // --- Visibility Toggle ---
     window.toggleVisibility = (inputId, iconElement) => {
@@ -489,6 +503,7 @@
             "New PIN must be exactly 5 digits.": "নতুন পিন অবশ্যই ৫ ডিজিটের হতে হবে।",
             "Resetting PIN...": "পিন রিসেট হচ্ছে...",
             "PIN changed successfully! Please unlock the app.": "সফলভাবে পিন পরিবর্তন করা হয়েছে! অনুগ্রহ করে অ্যাপ আনলক করুন।",
+            "PIN changed successfully! Please login.": "সফলভাবে পিন পরিবর্তন করা হয়েছে! অনুগ্রহ করে লগইন করুন।",
             "Saving to Sheet...": "সেভ হচ্ছে...",
             "Failed to save!": "সেভ করতে সমস্যা হয়েছে!",
             "Loading data...": "ডেটা লোড হচ্ছে...",
@@ -506,8 +521,10 @@
             "Invalid action.": "ভুল অ্যাকশন।",
             "Sending OTP...": "ওটিপি পাঠানো হচ্ছে...",
             "Verifying...": "যাচাই করা হচ্ছে...",
-            "Please enter the 6-digit OTP.": "৬-ডিজিটের ওটিপি দিন।",
-            "Incorrect OTP or expired.": "ওটিপি ভুল অথবা মেয়াদ শেষ।"
+            "Please enter the 6-digit OTP.": "৬-ডিজিটের ওটিপি দিন。",
+            "Incorrect OTP or expired.": "ওটিপি ভুল অথবা মেয়াদ শেষ।",
+            "Incorrect PIN or not cached offline.": "পিন ভুল অথবা অফলাইনে সেভ নেই।",
+            "No offline data available. Please connect to the internet.": "অফলাইনে কোনো ডেটা নেই। অনুগ্রহ করে ইন্টারনেট চালু করুন।"
         };
         return dict[enText] || enText;
     };
@@ -816,9 +833,24 @@
         const pin = document.getElementById('unlock-pin').value.trim();
         if(!/^\d{5}$/.test(pin)) { showAuthError(t("Please enter a valid 5-digit PIN."), "pin-error"); return; }
         
+        // Offline verification check
+        if (!navigator.onLine) {
+            const savedPin = localStorage.getItem('ih_pin_' + currentUser);
+            if (savedPin && savedPin === pin) {
+                document.getElementById('pin-error').classList.add('hidden');
+                document.getElementById('unlock-pin').value = '';
+                showScreen('main');
+                loadDataFromCloud();
+            } else {
+                showAuthError(t("Incorrect PIN or not cached offline."), "pin-error");
+            }
+            return;
+        }
+
         showLoader(t("Unlocking..."));
         try {
             await callAppsScript('verify_pin', { username: currentUser, pin: pin });
+            localStorage.setItem('ih_pin_' + currentUser, pin); // Save PIN for offline use
             document.getElementById('pin-error').classList.add('hidden');
             document.getElementById('unlock-pin').value = '';
             showScreen('main');
@@ -899,50 +931,39 @@
             window.closeModal('otp-modal');
             errDiv.classList.add('hidden');
             
+            lastCompletedAction = pendingAction;
+            
             if (pendingAction === 'register') {
-                // Return to login mode
-                isLoginMode = true;
-                document.getElementById('wrap-name').classList.add('hidden');
-                document.getElementById('wrap-pin').classList.add('hidden');
-                document.getElementById('wrap-sec-q').classList.add('hidden');
-                document.getElementById('wrap-confirm-pass').classList.add('hidden');
-                document.getElementById('wrap-forgot-pass').classList.remove('hidden');
-                updateDynamicTexts();
-                
-                showScreen('auth-screen');
-                showAuthSuccess(t("Account created successfully! Please login."));
-                setTimeout(() => hideAuthSuccess(), 3000);
+                document.getElementById('auth-name').value = '';
+                document.getElementById('auth-email').value = '';
+                document.getElementById('auth-pin').value = '';
+                document.getElementById('auth-sec-a').value = '';
+                document.getElementById('auth-password').value = '';
+                document.getElementById('auth-confirm-password').value = '';
+                document.getElementById('auth-sec-q').selectedIndex = 0;
+
+                document.getElementById('success-message').innerText = t("Account created successfully! Please login.");
+                window.openModal('success-modal');
             } else if (pendingAction === 'reset_password') {
+                document.getElementById('fp-email').value = '';
+                document.getElementById('fp-pin').value = '';
+                document.getElementById('fp-sec-a').value = '';
                 document.getElementById('fp-new-pass').value = '';
                 document.getElementById('fp-confirm-pass').value = '';
-                
-                // Return to login mode
-                isLoginMode = true;
-                document.getElementById('wrap-name').classList.add('hidden');
-                document.getElementById('wrap-pin').classList.add('hidden');
-                document.getElementById('wrap-sec-q').classList.add('hidden');
-                document.getElementById('wrap-confirm-pass').classList.add('hidden');
-                document.getElementById('wrap-forgot-pass').classList.remove('hidden');
-                updateDynamicTexts();
+                document.getElementById('fp-sec-q').selectedIndex = 0;
 
-                showScreen('auth-screen');
-                showAuthSuccess(t("Password changed successfully! Please login."));
-                setTimeout(() => hideAuthSuccess(), 3000);
+                document.getElementById('success-message').innerText = t("Password changed successfully! Please login.");
+                window.openModal('success-modal');
             } else if (pendingAction === 'reset_pin') {
+                document.getElementById('fpin-email').value = '';
+                document.getElementById('fpin-pass').value = '';
+                document.getElementById('fpin-sec-a').value = '';
                 document.getElementById('fpin-new-pin').value = '';
                 document.getElementById('fpin-confirm-pin').value = '';
-                
-                showScreen('pin-screen');
-                let pinErr = document.getElementById('pin-error');
-                pinErr.classList.remove('text-red-500');
-                pinErr.classList.add('text-green-600');
-                pinErr.innerText = t("PIN changed successfully! Please unlock the app.");
-                pinErr.classList.remove('hidden');
-                setTimeout(() => {
-                    pinErr.classList.add('hidden');
-                    pinErr.classList.remove('text-green-600');
-                    pinErr.classList.add('text-red-500');
-                }, 4000);
+                document.getElementById('fpin-sec-q').selectedIndex = 0;
+
+                document.getElementById('success-message').innerText = t("PIN changed successfully! Please unlock the app.");
+                window.openModal('success-modal');
             }
             
             pendingAction = null;
@@ -954,6 +975,17 @@
         } finally {
             hideLoader();
         }
+    };
+
+    window.closeSuccessModal = () => {
+        window.closeModal('success-modal');
+        if (lastCompletedAction === 'reset_pin') {
+            document.getElementById('unlock-pin').value = '';
+            showScreen('pin-screen');
+        } else {
+            window.logoutUser();
+        }
+        lastCompletedAction = null;
     };
 
     window.logoutUser = () => {
@@ -993,6 +1025,11 @@
     window.saveInfo = async (e) => {
         e.preventDefault();
         if (!currentUser) return;
+        
+        if (!navigator.onLine) {
+            alert(t("You are currently offline. Connect to internet to save info."));
+            return;
+        }
 
         const title = document.getElementById('info-title').value;
         const category = document.getElementById('info-category').value;
@@ -1024,11 +1061,26 @@
     window.loadDataFromCloud = async () => {
         if (!currentUser) return;
         
+        // Offline Mode
+        if (!navigator.onLine) {
+            const localData = localStorage.getItem('ih_data_' + currentUser);
+            if (localData) {
+                savedInfos = JSON.parse(localData);
+                renderItems();
+            } else {
+                alert(t("No offline data available. Please connect to the internet."));
+            }
+            return;
+        }
+        
         showLoader(t("Loading data..."));
         try {
             const result = await callAppsScript('load', { username: currentUser });
             savedInfos = result.data || [];
             savedInfos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            localStorage.setItem('ih_data_' + currentUser, JSON.stringify(savedInfos)); // Save data for offline use
+            
             renderItems();
 
             savedInfos.forEach(item => {
@@ -1045,6 +1097,12 @@
 
         } catch (error) {
             console.error("Fetch Error:", error);
+            // Fallback to offline data if network request fails
+            const localData = localStorage.getItem('ih_data_' + currentUser);
+            if (localData) {
+                savedInfos = JSON.parse(localData);
+                renderItems();
+            }
         } finally { hideLoader(); }
     };
 
@@ -1059,6 +1117,12 @@
     window.executeDelete = async () => {
         if(!itemToDelete || !currentUser) return;
         
+        if (!navigator.onLine) {
+            document.getElementById('delete-pin-error').innerText = t("You are offline. Cannot delete.");
+            document.getElementById('delete-pin-error').classList.remove('hidden');
+            return;
+        }
+
         const pinInput = document.getElementById('delete-pin-input').value.trim();
         const errDiv = document.getElementById('delete-pin-error');
         
@@ -1504,11 +1568,67 @@
     appleIcon.href = appIcon;
     document.head.appendChild(appleIcon);
 
-    const swCode = `self.addEventListener('fetch', () => {});`;
+    const swCode = `
+    const CACHE_NAME = 'ih-image-cache-v1';
+    self.addEventListener('install', (e) => self.skipWaiting());
+    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+    self.addEventListener('fetch', (event) => {
+        if (event.request.destination === 'image' || event.request.url.includes('drive.google.com')) {
+            event.respondWith(
+                caches.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) {
+                        fetch(event.request).then(response => {
+                            if(response && (response.status === 200 || response.status === 0)) {
+                                caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+                            }
+                        }).catch(()=>{});
+                        return cachedResponse;
+                    }
+                    return fetch(event.request).then((response) => {
+                        if (response && (response.status === 200 || response.status === 0)) {
+                            const responseToCache = response.clone();
+                            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+                        }
+                        return response;
+                    }).catch(() => {
+                        return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23eee"/><text x="50" y="50" font-family="Arial" font-size="12" text-anchor="middle" alignment-baseline="middle">Offline</text></svg>', { headers: { 'Content-Type': 'image/svg+xml' } });
+                    });
+                })
+            );
+        }
+    });
+    `;
     const swBlob = new Blob([swCode], {type: 'application/javascript'});
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
     }
+
+    // --- Network Status Logic ---
+    function updateNetworkStatus() {
+        const isOnline = navigator.onLine;
+        const icon = document.getElementById('network-icon');
+        if (icon) {
+            if (isOnline) {
+                icon.className = 'fa-solid fa-wifi text-green-300 text-sm transition-colors duration-300';
+                icon.title = currentLang === 'en' ? 'Online' : 'অনলাইন';
+                
+                // Fetch fresh data automatically when coming online (if unlocked)
+                if (currentUser && !document.getElementById('item-list').classList.contains('hidden')) {
+                    loadDataFromCloud(); 
+                }
+            } else {
+                icon.className = 'fa-solid fa-wifi text-red-400 text-sm opacity-60 transition-colors duration-300';
+                icon.title = currentLang === 'en' ? 'Offline' : 'অফলাইন';
+            }
+        }
+    }
+    
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    
+    // Check initial network status
+    document.addEventListener('DOMContentLoaded', updateNetworkStatus);
+    setTimeout(updateNetworkStatus, 100);
 
 </script>
 </body>
